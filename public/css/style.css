@@ -45,7 +45,7 @@ a:hover {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg,#db3434 0%,#ff6b6b 40%,#ffffff 70%,#1a1a1a 100%
+    background: linear-gradient(135deg,#db3434 0%,#ff6b6b 30%,#ffffff 60%,#1a1a1a 100%
 );
 }
 
@@ -83,12 +83,12 @@ a:hover {
     font-size: 1.6rem;
     font-weight: 700;
     border-radius: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 
 .login-title {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #2c3e50;
     margin-bottom: 4px;
