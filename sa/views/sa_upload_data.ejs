@@ -1,0 +1,174 @@
+<!-- ============================================================
+     FILE: sa/views/sa_upload_data.ejs
+     FUNGSI: Halaman upload data RO, LBP, Stock (1 halaman)
+     ALUR: GET /sa/upload-data → controller → render halaman ini
+     AKSES: Hanya user dengan jabatan SA
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+<link rel="stylesheet" href="/sa/css/sa.css">
+
+    <div class="page-header">
+        <h2 class="page-title">Upload Data</h2>
+        <p class="page-desc">
+            Upload data RO, LBP, dan Stock. File disimpan di
+            <strong>DATA_SA/<%= user.region || 'TANPA_REGION' %>/</strong>
+        </p>
+    </div>
+
+    <!-- Notifikasi -->
+    <% if (pesan) { %>
+    <div class="alert alert-info" style="white-space: pre-line;"><%= pesan %></div>
+    <% } %>
+
+    <!-- ====================================================
+         UPLOAD RO
+         ==================================================== -->
+    <div class="section sa-upload-section">
+        <h3 class="section-title">&#128203; Upload RO</h3>
+        <p style="font-size: 0.88rem; color: #7f8c8d; margin-bottom: 14px;">
+            Upload file (.xlsx, .xls, .csv) berisi data RO.
+        </p>
+
+        <form method="POST" action="/sa/upload-data/ro" enctype="multipart/form-data" class="sa-upload-form">
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="file" name="file_upload" accept=".xlsx,.xls,.csv" class="form-input" required>
+            </div>
+            <div class="form-group form-group-btn" style="margin-bottom: 0;">
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Upload file RO?')">
+                    &#128228; Upload RO
+                </button>
+            </div>
+        </form>
+
+        <% if (riwayatRO.length > 0) { %>
+        <div style="margin-top: 16px;">
+            <h4 style="font-size: 0.9rem; color: #2c3e50; margin-bottom: 8px;">Riwayat Upload RO</h4>
+            <div class="table-wrapper">
+                <table class="data-table data-table-sm">
+                    <thead>
+                        <tr><th>No</th><th>Nama File</th><th>Tanggal Upload</th><th>Aksi</th></tr>
+                    </thead>
+                    <tbody>
+                        <% riwayatRO.forEach(function(r, i) { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+                            <td><%= r.nama_file %></td>
+                            <td class="nowrap"><%= r.uploaded_at %></td>
+                            <td>
+                                <form method="POST" action="/sa/upload-data/hapus-ro" style="display:inline;"
+                                      onsubmit="return confirm('Hapus data RO ini?')">
+                                    <input type="hidden" name="upload_id" value="<%= r.id %>">
+                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- ====================================================
+         UPLOAD LBP
+         ==================================================== -->
+    <div class="section sa-upload-section">
+        <h3 class="section-title">&#128202; Upload LBP</h3>
+        <p style="font-size: 0.88rem; color: #7f8c8d; margin-bottom: 14px;">
+            Upload file (.xlsx, .xls, .csv) berisi data LBP.
+        </p>
+
+        <form method="POST" action="/sa/upload-data/lbp" enctype="multipart/form-data" class="sa-upload-form">
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="file" name="file_upload" accept=".xlsx,.xls,.csv" class="form-input" required>
+            </div>
+            <div class="form-group form-group-btn" style="margin-bottom: 0;">
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Upload file LBP?')">
+                    &#128228; Upload LBP
+                </button>
+            </div>
+        </form>
+
+        <% if (riwayatLBP.length > 0) { %>
+        <div style="margin-top: 16px;">
+            <h4 style="font-size: 0.9rem; color: #2c3e50; margin-bottom: 8px;">Riwayat Upload LBP</h4>
+            <div class="table-wrapper">
+                <table class="data-table data-table-sm">
+                    <thead>
+                        <tr><th>No</th><th>Nama File</th><th>Tanggal Upload</th><th>Aksi</th></tr>
+                    </thead>
+                    <tbody>
+                        <% riwayatLBP.forEach(function(r, i) { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+                            <td><%= r.nama_file %></td>
+                            <td class="nowrap"><%= r.uploaded_at %></td>
+                            <td>
+                                <form method="POST" action="/sa/upload-data/hapus-lbp" style="display:inline;"
+                                      onsubmit="return confirm('Hapus data LBP ini?')">
+                                    <input type="hidden" name="upload_id" value="<%= r.id %>">
+                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- ====================================================
+         UPLOAD STOCK
+         ==================================================== -->
+    <div class="section sa-upload-section">
+        <h3 class="section-title">&#128230; Upload Stock</h3>
+        <p style="font-size: 0.88rem; color: #7f8c8d; margin-bottom: 14px;">
+            Upload file (.xlsx, .xls, .csv) berisi data Stock.
+        </p>
+
+        <form method="POST" action="/sa/upload-data/stock" enctype="multipart/form-data" class="sa-upload-form">
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="file" name="file_upload" accept=".xlsx,.xls,.csv" class="form-input" required>
+            </div>
+            <div class="form-group form-group-btn" style="margin-bottom: 0;">
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Upload file Stock?')">
+                    &#128228; Upload Stock
+                </button>
+            </div>
+        </form>
+
+        <% if (riwayatStock.length > 0) { %>
+        <div style="margin-top: 16px;">
+            <h4 style="font-size: 0.9rem; color: #2c3e50; margin-bottom: 8px;">Riwayat Upload Stock</h4>
+            <div class="table-wrapper">
+                <table class="data-table data-table-sm">
+                    <thead>
+                        <tr><th>No</th><th>Nama File</th><th>Tanggal Upload</th><th>Aksi</th></tr>
+                    </thead>
+                    <tbody>
+                        <% riwayatStock.forEach(function(r, i) { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+                            <td><%= r.nama_file %></td>
+                            <td class="nowrap"><%= r.uploaded_at %></td>
+                            <td>
+                                <form method="POST" action="/sa/upload-data/hapus-stock" style="display:inline;"
+                                      onsubmit="return confirm('Hapus data Stock ini?')">
+                                    <input type="hidden" name="upload_id" value="<%= r.id %>">
+                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+<%- include('../../src/views/layout_footer') %>

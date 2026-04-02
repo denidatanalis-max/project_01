@@ -1,0 +1,116 @@
+<!-- ============================================================
+     FILE: mutasi/views/mutasi_history.ejs
+     FUNGSI: Riwayat proses mutasi, approval, dan removal
+     ALUR: GET /mutasi/history → controller → render halaman ini
+
+     LAYOUT:
+     ┌────────────────────────────────────────────────┐
+     │ Header                                         │
+     ├──────────────┬─────────────────────────────────┤
+     │ Sidebar      │ Riwayat Proses:                 │
+     │              │ ┌──────────────────────────┐    │
+     │              │ │ tabel riwayat            │    │
+     │              │ └──────────────────────────┘    │
+     └──────────────┴─────────────────────────────────┘
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+    <div class="page-header">
+        <h2 class="page-title">Riwayat Proses</h2>
+        <p class="page-desc">Jejak audit semua perubahan struktur organisasi yang melibatkan Anda.</p>
+    </div>
+
+    <!-- ====================================================
+         PESAN FLASH
+         ==================================================== -->
+    <% if (pesan) { %>
+    <div class="alert alert-info" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;">
+        <%= pesan %>
+    </div>
+    <% } %>
+
+    <!-- ====================================================
+         BAWAHAN LANGSUNG + TOMBOL REMOVE
+         ==================================================== -->
+    <% if (bawahan.length > 0) { %>
+    <div class="section" style="margin-bottom: 28px;">
+        <h3 class="section-title">Bawahan Langsung (<%= bawahan.length %>)</h3>
+
+        <div class="subordinate-list">
+            <% bawahan.forEach(function(b) { %>
+            <div class="subordinate-card">
+                <div class="subordinate-info">
+                    <strong><%= b.nama_pengguna %></strong>
+                    <span style="font-size: 0.8rem; color: #95a5a6;">@<%= b.user_name %></span>
+                    <span class="badge badge-<%= b.jabatan.toLowerCase() %>"><%= b.jabatan %></span>
+                    <span class="badge badge-<%= b.status === 'ACTIVE' ? 'success' : 'secondary' %>" style="font-size: 0.7rem;"><%= b.status %></span>
+                </div>
+                <form action="/mutasi/remove" method="POST" style="margin: 0;"
+                      onsubmit="return confirm('Yakin ingin menghapus ' + '<%= b.nama_pengguna %>' + ' dari struktur Anda?')">
+                    <input type="hidden" name="subordinate_id" value="<%= b.id %>">
+                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                </form>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- ====================================================
+         TABEL RIWAYAT
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">Riwayat Mutasi, Approval &amp; Removal</h3>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>User</th>
+                        <th>Jabatan</th>
+                        <th>Aksi</th>
+                        <th>Keterangan</th>
+                        <th>Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (history.length === 0) { %>
+                    <tr>
+                        <td colspan="6" class="text-center">Belum ada riwayat proses.</td>
+                    </tr>
+                    <% } else { %>
+                    <% history.forEach(function(h, i) { %>
+                    <tr>
+                        <td><%= i + 1 %></td>
+                        <td>
+                            <strong><%= h.nama_pengguna %></strong>
+                            <div style="font-size: 0.78rem; color: #95a5a6;">@<%= h.user_name %></div>
+                        </td>
+                        <td>
+                            <span class="badge badge-<%= h.jabatan.toLowerCase() %>"><%= h.jabatan %></span>
+                        </td>
+                        <td>
+                            <% if (h.action === 'REMOVE') { %>
+                                <span class="badge badge-danger">REMOVE</span>
+                            <% } else if (h.action === 'APPROVE') { %>
+                                <span class="badge badge-success">APPROVE</span>
+                            <% } else if (h.action === 'REJECT') { %>
+                                <span class="badge badge-warning">REJECT</span>
+                            <% } else if (h.action === 'MUTASI_REQUEST') { %>
+                                <span class="badge badge-info">REQUEST</span>
+                            <% } else { %>
+                                <span class="badge badge-secondary"><%= h.action %></span>
+                            <% } %>
+                        </td>
+                        <td class="detail-cell" style="max-width: 320px;"><%= h.description || '-' %></td>
+                        <td class="nowrap"><%= h.created_at %></td>
+                    </tr>
+                    <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<%- include('../../src/views/layout_footer') %>

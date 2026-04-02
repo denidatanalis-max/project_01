@@ -1,0 +1,474 @@
+<!-- ============================================================
+     FILE: user_auth/views/kelola_user.ejs
+     FUNGSI: Halaman manajemen user (tambah, edit, hapus)
+     ALUR: GET /admin/kelola-user → controller → render halaman ini
+     AKSES: Hanya admin (is_admin=1)
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+    <div class="page-header">
+        <h2 class="page-title">Kelola User</h2>
+        <p class="page-desc">Tambah, edit, atau hapus user sistem.</p>
+    </div>
+
+    <!-- Notifikasi -->
+    <% if (pesan) { %>
+    <div class="alert alert-info" style="white-space: pre-line;"><%= pesan %></div>
+    <% } %>
+
+    <!-- ====================================================
+         EDIT AKUN DEV (admin) — dengan verifikasi password
+         ==================================================== -->
+    <div class="section" style="border: 1px solid #d6eaf8; background: #f0f8ff;">
+        <h3 class="section-title" style="color: #2471a3;">&#9881; Edit Akun Dev</h3>
+        <p style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 14px;">
+            Akun: <strong><%= user.user_name %></strong> &middot; <span class="badge badge-dev">DEV</span>
+            &middot; Nama: <strong><%= user.nama_pengguna %></strong>
+        </p>
+        <form method="POST" action="/admin/kelola-user/edit-admin" class="form-inline-grid">
+            <div class="form-group">
+                <label class="form-label">Nama Pengguna Baru <small>(kosongkan jika tidak ganti)</small></label>
+                <input type="text" name="admin_nama" class="form-input" placeholder="Nama baru" value="">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password Baru <small>(kosongkan jika tidak ganti)</small></label>
+                <input type="password" name="admin_password_baru" class="form-input" placeholder="Password baru">
+            </div>
+            <div class="form-group">
+                <label class="form-label" style="color: #e74c3c;">Password Saat Ini <strong>(wajib)</strong></label>
+                <input type="password" name="admin_password" class="form-input" placeholder="Masukkan password saat ini" required>
+            </div>
+            <div class="form-group form-group-btn">
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Simpan perubahan akun dev?')">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ====================================================
+         UPLOAD USER VIA EXCEL
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">Upload User dari Excel</h3>
+        <p style="font-size: 0.88rem; color: #7f8c8d; margin-bottom: 14px;">
+            Upload file .xlsx atau .csv untuk menambah banyak user sekaligus.
+            Download template terlebih dahulu untuk format yang benar.
+        </p>
+
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px;">
+            <a href="/admin/kelola-user/template" class="btn btn-secondary btn-sm">&#11015; Download Template</a>
+        </div>
+
+        <form method="POST" action="/admin/kelola-user/upload-excel" enctype="multipart/form-data" class="form-inline-grid" style="grid-template-columns: 1fr auto;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="file" name="file_excel" accept=".xlsx,.xls,.csv" class="form-input" required>
+            </div>
+            <div class="form-group form-group-btn" style="margin-bottom: 0;">
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Upload dan tambahkan user dari file Excel?')">Upload &amp; Import</button>
+            </div>
+        </form>
+
+        <div class="info-box" style="margin-top: 12px;">
+            <strong>Format kolom:</strong> user_name | nama_pengguna | jabatan | password | region | nama_depo<br>
+            <strong>Jabatan valid:</strong> BOS, MANAGER, ASIST_MANAGER, SA, RBM, BM, ASS, SALES (DEV tidak bisa diimport)<br>
+            <strong>Password:</strong> Jika kosong, default = user_name + "123"<br>
+            <strong>Region &amp; Nama Depo:</strong> Opsional, bisa diisi nanti
+        </div>
+    </div>
+
+    <!-- ====================================================
+         FORM TAMBAH USER BARU
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">Tambah User Baru</h3>
+        <form method="POST" action="/admin/kelola-user/tambah" class="form-inline-grid">
+
+            <div class="form-group">
+                <label for="user_name" class="form-label">Username</label>
+                <input type="text" id="user_name" name="user_name" class="form-input" placeholder="Username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="nama_pengguna" class="form-label">Nama Pengguna</label>
+                <input type="text" id="nama_pengguna" name="nama_pengguna" class="form-input" placeholder="Nama Lengkap" required>
+            </div>
+
+            <div class="form-group">
+                <label for="jabatan" class="form-label">Jabatan</label>
+                <select id="jabatan" name="jabatan" class="form-input" required>
+                    <option value="">-- Pilih Jabatan --</option>
+                    <option value="BOS">BOS</option>
+                    <option value="MANAGER">MANAGER</option>
+                    <option value="ASIST_MANAGER">ASIST MANAGER</option>
+                    <option value="SA">SA</option>
+                    <option value="RBM">RBM</option>
+                    <option value="BM">BM</option>
+                    <option value="ASS">ASS</option>
+                    <option value="SALES">SALES</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="region" class="form-label">Region <small>(opsional)</small></label>
+                <input type="text" id="region" name="region" class="form-input" placeholder="Contoh: Jawa Barat">
+            </div>
+
+            <div class="form-group">
+                <label for="nama_depo" class="form-label">Nama Depo <small>(opsional)</small></label>
+                <input type="text" id="nama_depo" name="nama_depo" class="form-input" placeholder="Contoh: Depo Bandung">
+            </div>
+
+            <div class="form-group form-group-btn">
+                <button type="submit" class="btn btn-primary">Tambah User</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- ====================================================
+         TABEL DAFTAR USER (server-side pagination)
+         ==================================================== -->
+    <div class="section">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+            <h3 class="section-title" style="margin-bottom: 0;">
+                Daftar User (<%= totalUser %>)
+            </h3>
+        </div>
+
+        <%
+            // Helper: build query string for pagination links
+            var filterQS = '';
+            if (sUser)   filterQS += '&s_user='   + encodeURIComponent(sUser);
+            if (sNama)   filterQS += '&s_nama='   + encodeURIComponent(sNama);
+            if (sRegion) filterQS += '&s_region=' + encodeURIComponent(sRegion);
+            if (sDepo)   filterQS += '&s_depo='   + encodeURIComponent(sDepo);
+            var hasFilter = sUser || sNama || sRegion || sDepo;
+        %>
+
+        <!-- Filter multi-kolom -->
+        <form method="GET" action="/admin/kelola-user" style="margin-bottom: 16px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; align-items: end;">
+                <div>
+                    <label style="font-size: 0.8rem; color: #7f8c8d; display: block; margin-bottom: 4px;">Username</label>
+                    <input type="text" name="s_user" class="form-input" placeholder="Cari username..." value="<%= sUser %>" style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: #7f8c8d; display: block; margin-bottom: 4px;">Nama Pengguna</label>
+                    <input type="text" name="s_nama" class="form-input" placeholder="Cari nama..." value="<%= sNama %>" style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: #7f8c8d; display: block; margin-bottom: 4px;">Region</label>
+                    <input type="text" name="s_region" class="form-input" placeholder="Cari region..." value="<%= sRegion %>" style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: #7f8c8d; display: block; margin-bottom: 4px;">Nama Depo</label>
+                    <input type="text" name="s_depo" class="form-input" placeholder="Cari depo..." value="<%= sDepo %>" style="margin-bottom: 0;">
+                </div>
+                <div style="display: flex; gap: 8px; align-items: end;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="white-space: nowrap;">&#128269; Cari</button>
+                    <% if (hasFilter) { %>
+                        <a href="/admin/kelola-user" class="btn btn-secondary btn-sm" style="white-space: nowrap;">Reset</a>
+                    <% } %>
+                </div>
+            </div>
+            <% if (hasFilter) { %>
+            <div style="margin-top: 8px; font-size: 0.82rem; color: #7f8c8d;">
+                Filter aktif:
+                <% if (sUser) { %><span class="badge" style="background: #eaf2f8; color: #2e86c1; margin-right: 4px;">Username: <%= sUser %></span><% } %>
+                <% if (sNama) { %><span class="badge" style="background: #eaf2f8; color: #2e86c1; margin-right: 4px;">Nama: <%= sNama %></span><% } %>
+                <% if (sRegion) { %><span class="badge" style="background: #eaf2f8; color: #2e86c1; margin-right: 4px;">Region: <%= sRegion %></span><% } %>
+                <% if (sDepo) { %><span class="badge" style="background: #eaf2f8; color: #2e86c1; margin-right: 4px;">Depo: <%= sDepo %></span><% } %>
+                &mdash; Ditemukan: <strong><%= totalUser %></strong> user
+            </div>
+            <% } %>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Username</th>
+                        <th>Nama Pengguna</th>
+                        <th>Jabatan</th>
+                        <th>Region</th>
+                        <th>Nama Depo</th>
+                        <th>Dibuat</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (daftarUser.length === 0) { %>
+                    <tr>
+                        <td colspan="8" class="text-center">Belum ada user.</td>
+                    </tr>
+                    <% } else { %>
+                        <% daftarUser.forEach(function(u, i) { %>
+                        <tr>
+                            <td><%= (page - 1) * perPage + i + 1 %></td>
+                            <td><%= u.user_name %></td>
+                            <td><%= u.nama_pengguna %></td>
+                            <td><span class="badge badge-<%= u.jabatan.toLowerCase() %>"><%= u.jabatan %></span></td>
+                            <td><%= u.region || '-' %></td>
+                            <td><%= u.nama_depo || '-' %></td>
+                            <td class="nowrap"><%= u.created_at %></td>
+                            <td class="nowrap">
+                                <% if (!u.is_admin) { %>
+                                <!-- Tombol Edit -->
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-edit"
+                                    data-id="<%= u.id %>"
+                                    data-nama="<%= u.nama_pengguna %>"
+                                    data-jabatan="<%= u.jabatan %>"
+                                    data-region="<%= u.region || '' %>"
+                                    data-depo="<%= u.nama_depo || '' %>"
+                                    onclick="bukaFormEdit(this.dataset.id, this.dataset.nama, this.dataset.jabatan, this.dataset.region, this.dataset.depo)"
+                                >Edit</button>
+
+                                <!-- Tombol Hapus -->
+                                <% if (u.id !== user.id) { %>
+                                <form method="POST" action="/admin/kelola-user/hapus" style="display:inline;"
+                                      onsubmit="return confirm('Yakin hapus user <%= u.user_name %>?')">
+                                    <input type="hidden" name="user_id" value="<%= u.id %>">
+                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                </form>
+                                <% } %>
+                                <% } else { %>
+                                <span style="font-size: 0.8rem; color: #95a5a6;">— Edit via menu di atas</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <% if (totalPages > 1) { %>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 16px; flex-wrap: wrap;">
+            <% if (page > 1) { %>
+                <a href="/admin/kelola-user?page=1<%= filterQS %>" class="btn btn-sm btn-secondary">&laquo;</a>
+                <a href="/admin/kelola-user?page=<%= page - 1 %><%= filterQS %>" class="btn btn-sm btn-secondary">&lsaquo;</a>
+            <% } %>
+
+            <%
+                var startP = Math.max(1, page - 3);
+                var endP   = Math.min(totalPages, page + 3);
+            %>
+            <% for (var p = startP; p <= endP; p++) { %>
+                <% if (p === page) { %>
+                    <span class="btn btn-sm btn-primary" style="cursor: default;"><%= p %></span>
+                <% } else { %>
+                    <a href="/admin/kelola-user?page=<%= p %><%= filterQS %>" class="btn btn-sm btn-secondary"><%= p %></a>
+                <% } %>
+            <% } %>
+
+            <% if (page < totalPages) { %>
+                <a href="/admin/kelola-user?page=<%= page + 1 %><%= filterQS %>" class="btn btn-sm btn-secondary">&rsaquo;</a>
+                <a href="/admin/kelola-user?page=<%= totalPages %><%= filterQS %>" class="btn btn-sm btn-secondary">&raquo;</a>
+            <% } %>
+
+            <span style="font-size: 0.82rem; color: #7f8c8d; margin-left: 10px;">
+                Hal. <%= page %> / <%= totalPages %> &middot; Total: <%= totalUser %> user
+            </span>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- ====================================================
+         MODAL EDIT USER (hidden by default, tampil via JS)
+         ==================================================== -->
+    <div class="modal-overlay" id="modalEdit" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit User</h3>
+                <button type="button" class="modal-close" onclick="tutupModal()">&times;</button>
+            </div>
+            <form method="POST" action="/admin/kelola-user/edit">
+                <input type="hidden" id="edit_user_id" name="user_id">
+
+                <div class="form-group">
+                    <label class="form-label">Nama Pengguna</label>
+                    <input type="text" id="edit_nama" name="nama_pengguna" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Jabatan</label>
+                    <select id="edit_jabatan" name="jabatan" class="form-input" required>
+                        <option value="BOS">BOS</option>
+                        <option value="MANAGER">MANAGER</option>
+                        <option value="ASIST_MANAGER">ASIST MANAGER</option>
+                        <option value="SA">SA</option>
+                        <option value="RBM">RBM</option>
+                        <option value="BM">BM</option>
+                        <option value="ASS">ASS</option>
+                        <option value="SALES">SALES</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Region</label>
+                    <input type="text" id="edit_region" name="region" class="form-input" placeholder="Region">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Depo</label>
+                    <input type="text" id="edit_nama_depo" name="nama_depo" class="form-input" placeholder="Nama Depo">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password Baru <small>(kosongkan jika tidak ganti)</small></label>
+                    <input type="password" id="edit_password" name="password_baru" class="form-input" placeholder="Password baru">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="tutupModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         ZONA BAHAYA — Hapus Semua User (di bawah, tersembunyi)
+         ==================================================== -->
+    <div class="section" style="border: 1px solid #fadbd8; background: #fdf2f0; margin-top: 40px;">
+        <details>
+            <summary style="cursor: pointer; font-size: 0.88rem; color: #95a5a6; user-select: none; padding: 6px 0;">
+                &#9888; Zona Bahaya — Klik untuk membuka
+            </summary>
+            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #fadbd8;">
+                <h3 class="section-title" style="color: #e74c3c; margin-bottom: 8px;">Hapus Semua User</h3>
+                <p style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 14px;">
+                    Menghapus seluruh user biasa (non-admin). Berguna saat development untuk reset data user.
+                </p>
+                <button type="button" class="btn btn-danger btn-sm" onclick="bukaModalHapusSemua()">
+                    &#128465; Hapus Semua User Biasa
+                </button>
+            </div>
+        </details>
+    </div>
+
+<script>
+// =====================================================
+// EDIT USER MODAL
+// =====================================================
+function bukaFormEdit(id, nama, jabatan, region, depo) {
+    var modal = document.getElementById('modalEdit');
+    if (!modal) return;
+    document.getElementById('edit_user_id').value    = id;
+    document.getElementById('edit_nama').value        = nama;
+    document.getElementById('edit_jabatan').value     = jabatan;
+    document.getElementById('edit_region').value      = region || '';
+    document.getElementById('edit_nama_depo').value   = depo || '';
+    document.getElementById('edit_password').value    = '';
+    modal.style.display = 'flex';
+}
+
+function tutupModal() {
+    var modal = document.getElementById('modalEdit');
+    if (modal) modal.style.display = 'none';
+}
+
+(function() {
+    var modal = document.getElementById('modalEdit');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) tutupModal();
+        });
+    }
+})();
+
+// =====================================================
+// MODAL HAPUS SEMUA USER
+// =====================================================
+function bukaModalHapusSemua() {
+    document.getElementById('modalHapusSemua').style.display = 'flex';
+    document.getElementById('hapusSemua_konfirmasi').style.display = 'block';
+    document.getElementById('hapusSemua_password').style.display = 'none';
+    document.getElementById('hapusSemua_error').style.display = 'none';
+    document.getElementById('admin_password_hapus').value = '';
+}
+
+function hapusSemuaLanjut() {
+    document.getElementById('hapusSemua_konfirmasi').style.display = 'none';
+    document.getElementById('hapusSemua_password').style.display = 'block';
+    document.getElementById('admin_password_hapus').focus();
+}
+
+function tutupModalHapusSemua() {
+    document.getElementById('modalHapusSemua').style.display = 'none';
+}
+
+function submitHapusSemua() {
+    var pw = document.getElementById('admin_password_hapus').value;
+    if (!pw || pw.trim() === '') {
+        document.getElementById('hapusSemua_error').style.display = 'block';
+        document.getElementById('hapusSemua_error').textContent = 'Password tidak boleh kosong.';
+        return;
+    }
+    document.getElementById('formHapusSemua').submit();
+}
+
+(function() {
+    var modal = document.getElementById('modalHapusSemua');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) tutupModalHapusSemua();
+        });
+    }
+})();
+</script>
+
+    <!-- ====================================================
+         MODAL HAPUS SEMUA USER
+         ==================================================== -->
+    <div class="modal-overlay" id="modalHapusSemua" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: #e74c3c;">&#9888; Hapus Semua User</h3>
+                <button type="button" class="modal-close" onclick="tutupModalHapusSemua()">&times;</button>
+            </div>
+
+            <!-- Step 1: Konfirmasi -->
+            <div id="hapusSemua_konfirmasi">
+                <p style="font-size: 0.95rem; color: #2c3e50; margin-bottom: 8px;">
+                    <strong>Apakah Anda yakin ingin menghapus SEMUA user?</strong>
+                </p>
+                <p style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 20px;">
+                    Tindakan ini akan menghapus semua akun user biasa (non-admin) beserta data sesi mereka.
+                    Akun admin Anda <strong>tidak akan</strong> terhapus.
+                    <br><br>
+                    <span style="color: #e74c3c; font-weight: 600;">&#9888; Tindakan ini tidak dapat dibatalkan!</span>
+                </p>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="tutupModalHapusSemua()">Tidak, Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="hapusSemuaLanjut()">Ya, Lanjutkan</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Password admin -->
+            <div id="hapusSemua_password" style="display: none;">
+                <p style="font-size: 0.95rem; color: #2c3e50; margin-bottom: 16px;">
+                    Masukkan <strong>password admin</strong> Anda untuk konfirmasi:
+                </p>
+                <div id="hapusSemua_error" class="alert alert-danger" style="display: none;"></div>
+                <form id="formHapusSemua" method="POST" action="/admin/kelola-user/hapus-semua">
+                    <div class="form-group">
+                        <label class="form-label">Password Admin</label>
+                        <input type="password" id="admin_password_hapus" name="admin_password" class="form-input" placeholder="Masukkan password admin" required autocomplete="off">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="tutupModalHapusSemua()">Batal</button>
+                        <button type="button" class="btn btn-danger" onclick="submitHapusSemua()">&#128465; Hapus Semua User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<%- include('../../src/views/layout_footer') %>

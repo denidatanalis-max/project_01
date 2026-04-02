@@ -1,0 +1,58 @@
+<!-- ============================================================
+     FILE: src/views/riwayat_login.ejs
+     FUNGSI: Halaman riwayat login/logout user
+     ALUR: GET /riwayat-login → controller → render halaman ini
+     ============================================================ -->
+<%- include('layout_header') %>
+
+    <div class="page-header">
+        <h2 class="page-title">Riwayat Login</h2>
+        <p class="page-desc">Catatan login, logout, dan force logout semua user.</p>
+    </div>
+
+    <div class="section">
+        <div class="table-wrapper">
+            <table class="data-table" id="tabelRiwayat">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Waktu</th>
+                        <th>Username</th>
+                        <th>Nama</th>
+                        <th>Jabatan</th>
+                        <th>Aksi</th>
+                        <th>IP</th>
+                        <th>User Agent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (riwayat.length === 0) { %>
+                    <tr>
+                        <td colspan="8" class="text-center">Belum ada riwayat login.</td>
+                    </tr>
+                    <% } else { %>
+                        <% riwayat.forEach(function(r, i) { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+                            <td class="nowrap"><%= r.created_at %></td>
+                            <td><%= r.user_name %></td>
+                            <td><%= r.nama_pengguna %></td>
+                            <td><span class="badge badge-<%= r.jabatan.toLowerCase() %>"><%= r.jabatan %></span></td>
+                            <td>
+                                <span class="badge
+                                    <% if (r.action === 'LOGIN') { %> badge-success
+                                    <% } else if (r.action === 'LOGOUT') { %> badge-info
+                                    <% } else { %> badge-danger <% } %>
+                                "><%= r.action %></span>
+                            </td>
+                            <td><%= r.ip_address %></td>
+                            <td class="detail-cell"><%= r.user_agent || '-' %></td>
+                        </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<%- include('layout_footer') %>

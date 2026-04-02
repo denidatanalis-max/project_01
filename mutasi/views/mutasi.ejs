@@ -1,0 +1,265 @@
+<!-- ============================================================
+     FILE: mutasi/views/mutasi.ejs
+     FUNGSI: Halaman Mutasi Atasan — info atasan + form pengajuan
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+<div class="page-header">
+    <h2 class="page-title">Mutasi Atasan</h2>
+    <p class="page-desc">Lihat atasan Anda saat ini dan ajukan perubahan jika diperlukan.</p>
+</div>
+
+<!-- Notifikasi -->
+<% if (pesan) { %>
+<div class="alert alert-info"><%= pesan %></div>
+<% } %>
+
+<!-- ====================================================
+     SECTION UTAMA (DINAMIS)
+     ==================================================== -->
+<div class="section">
+
+    <!-- ✅ JUDUL DINAMIS -->
+    <h3 class="section-title">
+        <% if (atasan) { %>
+            Atasan Saat Ini
+        <% } else { %>
+            Ajukan Perubahan Atasan
+        <% } %>
+    </h3>
+
+    <!-- ====================================================
+         ATASAN SAAT INI
+         ==================================================== -->
+    <% if (!parentRole) { %>
+        <!-- BOS -->
+        <div class="atasan-card atasan-card-empty">
+            <div class="atasan-icon">&#9733;</div>
+            <div class="atasan-info">
+                <div class="atasan-nama">Anda adalah <strong><%= user.jabatan %></strong></div>
+                <div class="atasan-desc">Jabatan tertinggi — tidak memiliki atasan.</div>
+            </div>
+        </div>
+
+    <% } else if (atasan) { %>
+        <!-- ADA ATASAN -->
+        <div class="atasan-card">
+            <div class="atasan-icon atasan-icon-active">&#9679;</div>
+            <div class="atasan-info">
+                <div class="atasan-nama"><strong><%= atasan.nama_pengguna %></strong></div>
+                <div class="atasan-detail">
+                    <span class="badge badge-<%= atasan.jabatan.toLowerCase() %>">
+                        <%= atasan.jabatan %>
+                    </span>
+                    <span class="atasan-username">@<%= atasan.user_name %></span>
+                </div>
+            </div>
+        </div>
+
+    <% } else { %>
+        <!-- TIDAK ADA ATASAN -->
+        <div class="atasan-card atasan-card-empty">
+            <div class="atasan-icon atasan-icon-none">&#10007;</div>
+            <div class="atasan-info">
+                <div class="atasan-nama">Belum ada atasan</div>
+                <div class="atasan-desc">
+                    Atasan Anda belum ditentukan. Silakan ajukan melalui form di bawah.
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- ====================================================
+         FORM AJUKAN MUTASI (HANYA MUNCUL JIKA TIDAK ADA ATASAN)
+         ==================================================== -->
+    <% if (parentRole && !atasan) { %>
+
+        <% if (adaPending) { %>
+            <div class="alert alert-warning">
+                Anda masih memiliki pengajuan yang menunggu persetujuan.
+                Tunggu hingga diproses sebelum mengajukan lagi.
+            </div>
+        <% } else { %>
+
+            <% if (calonAtasan.length === 0) { %>
+                <div class="info-box">
+                    Tidak ada calon atasan (<%= parentRole %>) yang tersedia saat ini.
+                </div>
+            <% } else { %>
+
+                <p style="font-size: 0.88rem; color: #7f8c8d; margin-bottom: 14px;">
+                    Pilih atasan baru dari daftar <strong><%= parentRole %></strong>.
+                    Perubahan berlaku setelah disetujui.
+                </p>
+
+                <form method="POST" action="/mutasi/ajukan"
+                      onsubmit="return confirm('Yakin ingin mengajukan mutasi ke atasan baru?')">
+
+                    <div class="form-group">
+                        <label class="form-label">Atasan Baru (<%= parentRole %>)</label>
+
+                        <select name="new_parent_id" class="form-input" required>
+                            <option value="">-- Pilih Atasan Baru --</option>
+
+                            <% calonAtasan.forEach(function(c) { %>
+                                <option value="<%= c.id %>">
+                                    <%= c.nama_pengguna %> (@<%= c.user_name %>)
+                                </option>
+                            <% }); %>
+
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Ajukan Mutasi
+                    </button>
+                </form>
+
+            <% } %>
+        <% } %>
+
+    <% } %>
+
+</div>
+
+<!-- ====================================================
+     RIWAYAT PENGAJUAN MUTASI
+     ==================================================== -->
+<div class="section">
+    <h3 class="section-title">Riwayat Pengajuan</h3>
+
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Atasan Lama</th>
+                    <th>Atasan Baru</th>
+                    <th>Status</th>
+                    <th>Diajukan</th>
+                    <th>Diproses</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <% if (riwayat.length === 0) { %>
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Belum ada riwayat pengajuan.
+                        </td>
+                    </tr>
+
+                <% } else { %>
+                    <% riwayat.forEach(function(r, i) { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+
+                            <!-- Atasan Lama -->
+                            <td>
+                                <% if (r.old_parent_nama) { %>
+                                    <%= r.old_parent_nama %>
+                                    <span class="badge badge-<%= r.old_parent_jabatan.toLowerCase() %>">
+                                        <%= r.old_parent_jabatan %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="text-muted">-</span>
+                                <% } %>
+                            </td>
+
+                            <!-- Atasan Baru -->
+                            <td>
+                                <%= r.new_parent_nama %>
+                                <span class="badge badge-<%= r.new_parent_jabatan.toLowerCase() %>">
+                                    <%= r.new_parent_jabatan %>
+                                </span>
+                            </td>
+
+                            <!-- Status -->
+                            <td>
+                                <% if (r.status === 'PENDING') { %>
+                                    <span class="badge badge-warning">PENDING</span>
+                                <% } else if (r.status === 'APPROVED') { %>
+                                    <span class="badge badge-success">APPROVED</span>
+                                <% } else { %>
+                                    <span class="badge badge-danger">REJECTED</span>
+                                <% } %>
+                            </td>
+
+                            <!-- Tanggal -->
+                            <td class="nowrap"><%= r.created_at %></td>
+                            <td class="nowrap"><%= r.approved_at || '-' %></td>
+                        </tr>
+                    <% }); %>
+                <% } %>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ====================================================
+     UBAH REGION & NAMA DEPO (perlu acc atasan)
+     Hanya tampil jika:
+     - User punya atasan (parent_id ada)
+     - Jabatan yang wajib punya atasan (BM, ASS, SALES)
+     ==================================================== -->
+<% var perluAtasan = ['BM', 'ASS', 'SALES']; %>
+<% if (atasan && perluAtasan.indexOf(user.jabatan) !== -1) { %>
+<div class="section">
+    <h3 class="section-title">Ubah Region &amp; Nama Depo</h3>
+    <p style="font-size: 0.88rem; color: #7f8c8d; margin-bottom: 14px;">
+        Perubahan region dan nama depo memerlukan persetujuan atasan Anda
+        (<strong><%= atasan.nama_pengguna %></strong>).
+    </p>
+
+    <!-- Info saat ini -->
+    <div style="display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap;">
+        <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; color: #7f8c8d; letter-spacing: 0.3px;">Region saat ini</span>
+            <p style="font-weight: 600; color: #2c3e50;"><%= user.region || '(belum diisi)' %></p>
+        </div>
+        <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; color: #7f8c8d; letter-spacing: 0.3px;">Nama Depo saat ini</span>
+            <p style="font-weight: 600; color: #2c3e50;"><%= user.nama_depo || '(belum diisi)' %></p>
+        </div>
+    </div>
+
+    <% if (adaPendingDepo) { %>
+        <div class="alert alert-warning">
+            Anda sudah memiliki pengajuan perubahan region/depo yang menunggu persetujuan.
+            Tunggu hingga diproses sebelum mengajukan lagi.
+        </div>
+    <% } else { %>
+        <form method="POST" action="/mutasi/ajukan-depo"
+              onsubmit="return confirm('Ajukan perubahan region & nama depo? Menunggu persetujuan atasan.')">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="form-group">
+                    <label class="form-label">Region Baru</label>
+                    <input type="text" name="new_region" class="form-input" placeholder="Contoh: Jawa Barat" value="<%= user.region || '' %>" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nama Depo Baru</label>
+                    <input type="text" name="new_nama_depo" class="form-input" placeholder="Contoh: Depo Bandung" value="<%= user.nama_depo || '' %>" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajukan Perubahan</button>
+        </form>
+    <% } %>
+</div>
+<% } %>
+
+<% var tanpaAtasan = ['BOS', 'MANAGER', 'RBM']; %>
+<% if (tanpaAtasan.indexOf(user.jabatan) !== -1) { %>
+<div class="section">
+    <h3 class="section-title">Region &amp; Nama Depo</h3>
+    <div class="info-box">
+        Sebagai <strong><%= user.jabatan %></strong>, kolom region dan nama depo bersifat opsional.
+        Hubungi admin jika perlu diubah.
+        <br><br>
+        <strong>Region:</strong> <%= user.region || '(kosong)' %> &nbsp; | &nbsp;
+        <strong>Nama Depo:</strong> <%= user.nama_depo || '(kosong)' %>
+    </div>
+</div>
+<% } %>
+
+<%- include('../../src/views/layout_footer') %>

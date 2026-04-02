@@ -1,0 +1,214 @@
+/* ============================================================
+   FILE: sa/css/sa.css
+   FUNGSI: Styling khusus modul SA (Sales Analyst)
+   CLEAN VERSION (no conflict, no duplicate)
+   ============================================================ */
+
+/* --- Page Header (User Info) --- */
+.page-header .page-desc div:first-child {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.page-header .page-desc div:not(:first-child) {
+    color: #666;
+    font-size: 14px;
+}
+
+/* --- Summary Cards Grid --- */
+.sa-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+/* Force 3 kolom (optional override) */
+.sa-summary-3col {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+/* --- Summary Card --- */
+.sa-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.sa-card-ro {
+    border-left: 4px solid #8e44ad;
+}
+
+.sa-card-lbp {
+    border-left: 4px solid #27ae60;
+}
+
+.sa-card-stock {
+    border-left: 4px solid #2e86c1;
+}
+
+/* --- Card Content --- */
+.sa-summary-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+}
+
+.sa-summary-info {
+    flex: 1;
+}
+
+.sa-summary-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 2px 0;
+    line-height: 1;
+}
+
+.sa-summary-label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin: 0 0 4px 0;
+}
+
+.sa-summary-detail {
+    font-size: 0.78rem;
+    color: #b0b0b0;
+}
+
+/* --- Upload Grid --- */
+.sa-upload-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.sa-upload-box {
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+}
+
+.sa-upload-box h4 {
+    margin: 0 0 10px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.sa-box-ro    { border-top: 3px solid #8e44ad; }
+.sa-box-lbp   { border-top: 3px solid #27ae60; }
+.sa-box-stock { border-top: 3px solid #2e86c1; }
+
+.sa-file-input {
+    width: 100%;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+}
+
+.sa-upload-btn {
+    width: 100%;
+}
+
+/* --- Menu Grid --- */
+.sa-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.sa-menu-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #2c3e50;
+    transition: all 0.15s ease;
+}
+
+.sa-menu-card:hover {
+    border-color: #2e86c1;
+    box-shadow: 0 4px 12px rgba(46,134,193,0.15);
+}
+
+.sa-menu-icon {
+    font-size: 1.6rem;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.sa-icon-upload {
+    background: #eaf2f8;
+    color: #2e86c1;
+}
+
+.sa-menu-info h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.sa-menu-info p {
+    margin: 2px 0 0 0;
+    font-size: 0.82rem;
+    color: #95a5a6;
+}
+
+.sa-menu-arrow {
+    margin-left: auto;
+    font-size: 1.2rem;
+    color: #bdc3c7;
+}
+
+/* --- Upload Section --- */
+.sa-upload-section {
+    margin-top: 16px;
+}
+
+.sa-upload-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   RESPONSIVE (clean & no duplicate)
+   ============================================================ */
+
+@media (max-width: 900px) {
+    .sa-summary-3col {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .sa-upload-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .sa-summary-grid,
+    .sa-summary-3col,
+    .sa-upload-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sa-upload-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

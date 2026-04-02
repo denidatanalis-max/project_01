@@ -1,0 +1,36 @@
+<%- include('../../src/views/layout_header') %>
+
+    <div class="page-header">
+        <h2 class="page-title">Dashboard Pencapaian</h2>
+        <p class="page-desc">Ringkasan pencapaian dan akses cepat ke modul terkait.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px;">
+
+        <a href="/pencapaian/lph" class="section" style="text-decoration: none; color: inherit; text-align: center; padding: 28px 16px; transition: transform 0.2s, box-shadow 0.2s;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">&#128202;</div>
+            <h3 style="margin: 0 0 6px 0; font-size: 1.1rem;">LPH</h3>
+            <p style="font-size: 0.85rem; color: #7f8c8d; margin: 0;">Laporan Penjualan Harian</p>
+        </a>
+
+        <a href="/pencapaian/scorecard" class="section" style="text-decoration: none; color: inherit; text-align: center; padding: 28px 16px; transition: transform 0.2s, box-shadow 0.2s;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">&#127942;</div>
+            <h3 style="margin: 0 0 6px 0; font-size: 1.1rem;">ScoreCard</h3>
+            <p style="font-size: 0.85rem; color: #7f8c8d; margin: 0;">Dashboard ScoreCard performa</p>
+        </a>
+
+        <a href="/pencapaian/mpp" class="section" style="text-decoration: none; color: inherit; text-align: center; padding: 28px 16px; transition: transform 0.2s, box-shadow 0.2s;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">&#128101;</div>
+            <h3 style="margin: 0 0 6px 0; font-size: 1.1rem;">MPP</h3>
+            <p style="font-size: 0.85rem; color: #7f8c8d; margin: 0;">Man Power Planning</p>
+        </a>
+
+        <a href="/pencapaian/stock" class="section" style="text-decoration: none; color: inherit; text-align: center; padding: 28px 16px; transition: transform 0.2s, box-shadow 0.2s;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">&#128202;</div>
+            <h3 style="margin: 0 0 6px 0; font-size: 1.1rem;">Stock</h3>
+            <p style="font-size: 0.85rem; color: #7f8c8d; margin: 0;">Informasi Stock Barang</p>
+        </a>
+
+    </div>
+
+<%- include('../../src/views/layout_footer') %>

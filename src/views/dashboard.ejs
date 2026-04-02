@@ -1,0 +1,139 @@
+<!-- ============================================================
+     FILE: src/views/dashboard.ejs
+     FUNGSI: Halaman dashboard utama (tampilan sesuai jabatan)
+     ALUR: GET /dashboard → controller → render halaman ini
+     ============================================================ -->
+<%- include('layout_header') %>
+
+    <!-- Judul halaman -->
+    <div class="page-header">
+        <h2 class="page-title">Dashboard</h2>
+        <p class="page-desc">
+            Selamat datang, <strong><%= user.nama_pengguna %></strong>
+            — Level: <span class="badge badge-<%= user.jabatan.toLowerCase() %>"><%= user.jabatan %></span>
+        </p>
+    </div>
+
+    <!-- ====================================================
+         KARTU STATISTIK (hanya tampil jika punya bawahan)
+         ==================================================== -->
+    <% if (canSee.length > 0) { %>
+    <div class="stat-cards">
+
+        <!-- Total user bawahan -->
+        <div class="stat-card">
+            <div class="stat-card-icon">&#9679;</div>
+            <div class="stat-card-body">
+                <p class="stat-card-value"><%= totalUser %></p>
+                <p class="stat-card-label">Total User Bawahan</p>
+            </div>
+        </div>
+
+        <!-- Per jabatan -->
+        <% userPerJabatan.forEach(function(item) { %>
+        <div class="stat-card">
+            <div class="stat-card-icon stat-icon-<%= item.jabatan.toLowerCase() %>">&#9670;</div>
+            <div class="stat-card-body">
+                <p class="stat-card-value"><%= item.jumlah %></p>
+                <p class="stat-card-label"><%= item.jabatan %></p>
+            </div>
+        </div>
+        <% }); %>
+
+        <!-- Jumlah yang sedang online -->
+        <div class="stat-card">
+            <div class="stat-card-icon stat-icon-online">&#9654;</div>
+            <div class="stat-card-body">
+                <p class="stat-card-value"><%= bawahanAktif.length %></p>
+                <p class="stat-card-label">Sedang Online</p>
+            </div>
+        </div>
+
+    </div>
+    <% } %>
+
+    <!-- ====================================================
+         TABEL: User yang Sedang Online (bawahan)
+         Hanya tampil jika jabatan punya bawahan
+         ==================================================== -->
+    <% if (canSee.length > 0 && bawahanAktif.length > 0) { %>
+    <div class="section">
+        <h3 class="section-title">User Sedang Online</h3>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Username</th>
+                        <th>Nama</th>
+                        <th>Jabatan</th>
+                        <th>Login Sejak</th>
+                        <th>Terakhir Aktif</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% bawahanAktif.forEach(function(b, i) { %>
+                    <tr>
+                        <td><%= i + 1 %></td>
+                        <td><%= b.user_name %></td>
+                        <td><%= b.nama_pengguna %></td>
+                        <td><span class="badge badge-<%= b.jabatan.toLowerCase() %>"><%= b.jabatan %></span></td>
+                        <td><%= b.login_at %></td>
+                        <td><%= b.last_active %></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- ====================================================
+         TABEL: Riwayat Login Pribadi (5 terakhir)
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">Riwayat Login Anda (5 Terakhir)</h3>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Aksi</th>
+                        <th>IP Address</th>
+                        <th>Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (loginTerakhir.length === 0) { %>
+                    <tr>
+                        <td colspan="4" class="text-center">Belum ada riwayat login.</td>
+                    </tr>
+                    <% } else { %>
+                        <% loginTerakhir.forEach(function(l, i) { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+                            <td>
+                                <span class="badge
+                                    <% if (l.action === 'LOGIN') { %> badge-success
+                                    <% } else if (l.action === 'LOGOUT') { %> badge-info
+                                    <% } else { %> badge-danger <% } %>
+                                "><%= l.action %></span>
+                            </td>
+                            <td><%= l.ip_address %></td>
+                            <td><%= l.created_at %></td>
+                        </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pesan jika ASS (tidak punya bawahan) -->
+    <% if (canSee.length === 0) { %>
+    <div class="info-box">
+        <p><strong>Info:</strong> Anda login sebagai <strong>ASS</strong>. Dashboard menampilkan data pribadi Anda saja.</p>
+    </div>
+    <% } %>
+
+<%- include('layout_footer') %>

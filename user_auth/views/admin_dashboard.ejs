@@ -1,0 +1,183 @@
+<!-- ============================================================
+     FILE: user_auth/views/admin_dashboard.ejs
+     FUNGSI: Dashboard Admin — realtime online user per role
+     ALUR: GET /admin → controller → render halaman ini
+
+     FITUR:
+       1. Kartu statistik per role (BOS, MANAGER, RBM, BM, ASS, SALES)
+       2. Angka online di-update real-time via Socket.IO
+       3. Klik kartu → expand dropdown daftar user online role itu
+       4. Klik lagi → collapse (toggle)
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+    <!-- Judul halaman -->
+    <div class="page-header">
+        <h2 class="page-title">Dashboard Admin</h2>
+        <p class="page-desc">Pantau user online secara real-time. Klik kartu role untuk melihat detail.</p>
+    </div>
+
+    <!-- ====================================================
+         STATISTIK TOTAL
+         ==================================================== -->
+    <div class="stat-cards">
+        <div class="stat-card">
+            <div class="stat-card-icon stat-icon-total">&#9632;</div>
+            <div class="stat-card-body">
+                <div class="stat-card-value"><%= totalUser %></div>
+                <div class="stat-card-label">Total User</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon stat-icon-online">&#9679;</div>
+            <div class="stat-card-body">
+                <div class="stat-card-value" id="totalOnlineCount">0</div>
+                <div class="stat-card-label">Sedang Online</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         ONLINE PER ROLE: Kartu klik-expand
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">&#9679; User Online per Role</h3>
+
+        <div class="online-role-grid" id="onlineRoleGrid">
+            <% var roles = ['BOS', 'MANAGER', 'ASIST_MANAGER', 'SA', 'RBM', 'BM', 'ASS', 'SALES']; %>
+            <% roles.forEach(function(role) { %>
+            <div class="online-role-card" data-role="<%= role %>" onclick="toggleRoleDetail('<%= role %>')">
+                <div class="online-role-icon role-icon-<%= role.toLowerCase() %>">
+                    <span class="online-role-count" id="count_<%= role %>">0</span>
+                </div>
+                <div class="online-role-label"><%= role %></div>
+                <div class="online-role-arrow" id="arrow_<%= role %>">&#9660;</div>
+            </div>
+
+            <!-- Dropdown detail user untuk role ini -->
+            <div class="online-role-detail" id="detail_<%= role %>" style="display:none;">
+                <div class="online-role-detail-inner" id="list_<%= role %>">
+                    <p class="text-muted">Tidak ada user online.</p>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         AKSI CEPAT
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">Aksi Cepat</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/admin/kelola-user" class="btn btn-primary">&#9670; Kelola User</a>
+            <a href="/admin/aktivitas" class="btn btn-info">&#9654; Log Aktivitas</a>
+            <a href="/admin/riwayat-login" class="btn btn-secondary">&#9200; Riwayat Login</a>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         SCRIPT: Toggle dropdown + update dari Socket.IO
+         ==================================================== -->
+    <script>
+        // Data online disimpan di variabel global halaman ini
+        var onlineData = { counts: {}, details: [] };
+        var openRoles  = {};
+
+        // Toggle expand/collapse detail per role
+        function toggleRoleDetail(role) {
+            var el    = document.getElementById('detail_' + role);
+            var arrow = document.getElementById('arrow_' + role);
+            if (!el) return;
+
+            if (el.style.display === 'none') {
+                el.style.display = 'block';
+                arrow.innerHTML  = '&#9650;';
+                openRoles[role]  = true;
+                renderRoleDetail(role);
+            } else {
+                el.style.display = 'none';
+                arrow.innerHTML  = '&#9660;';
+                openRoles[role]  = false;
+            }
+        }
+
+        // Render daftar user di dalam dropdown role
+        function renderRoleDetail(role) {
+            var container = document.getElementById('list_' + role);
+            if (!container) return;
+
+            var users = onlineData.details.filter(function(u) {
+                return u.jabatan === role;
+            });
+
+            if (users.length === 0) {
+                container.innerHTML = '<p class="text-muted">Tidak ada user online.</p>';
+                return;
+            }
+
+            var html = '<table class="data-table data-table-sm">';
+            html += '<thead><tr><th>Nama</th><th>Username</th><th>Login Sejak</th><th>Device</th></tr></thead>';
+            html += '<tbody>';
+            for (var i = 0; i < users.length; i++) {
+                var u  = users[i];
+                var ua = parseDevice(u.user_agent || '');
+                html += '<tr>';
+                html += '<td><span class="online-dot"></span> ' + escapeHtml(u.nama_pengguna) + '</td>';
+                html += '<td>' + escapeHtml(u.user_name) + '</td>';
+                html += '<td class="nowrap">' + escapeHtml(u.login_at || '-') + '</td>';
+                html += '<td class="detail-cell">' + escapeHtml(ua) + '</td>';
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Update semua kartu dan dropdown yang terbuka
+        function updateOnlineUI(data) {
+            onlineData = data;
+            var roles  = ['BOS', 'MANAGER', 'ASIST_MANAGER', 'SA', 'RBM', 'BM', 'ASS', 'SALES'];
+            var total  = 0;
+
+            for (var i = 0; i < roles.length; i++) {
+                var role  = roles[i];
+                var count = data.counts[role] || 0;
+                total += count;
+
+                var el = document.getElementById('count_' + role);
+                if (el) el.textContent = count;
+
+                // Update dropdown jika sedang terbuka
+                if (openRoles[role]) {
+                    renderRoleDetail(role);
+                }
+            }
+
+            var totalEl = document.getElementById('totalOnlineCount');
+            if (totalEl) totalEl.textContent = total;
+        }
+
+        // Parse user-agent jadi nama device ringkas
+        function parseDevice(ua) {
+            if (!ua) return '-';
+            if (ua.indexOf('Mobile') !== -1 || ua.indexOf('Android') !== -1) return 'Mobile';
+            if (ua.indexOf('Windows') !== -1) return 'Windows';
+            if (ua.indexOf('Mac') !== -1) return 'Mac';
+            if (ua.indexOf('Linux') !== -1) return 'Linux';
+            return 'Browser';
+        }
+
+        // Escape HTML untuk keamanan
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        // Ambil data awal via API
+        fetch('/api/online-users')
+            .then(function(r) { return r.json(); })
+            .then(function(data) { updateOnlineUI(data); });
+    </script>
+
+<%- include('../../src/views/layout_footer') %>

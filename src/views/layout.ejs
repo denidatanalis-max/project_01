@@ -1,0 +1,78 @@
+<!-- ============================================================
+     FILE: src/views/layout.ejs
+     FUNGSI: Template layout utama (header, sidebar, footer)
+     ALUR: Setiap halaman menggunakan layout ini via include
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> — Sistem Manajemen</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- ====================================================
+         HEADER / NAVBAR
+         ==================================================== -->
+    <header class="header">
+        <div class="header-left">
+            <span class="logo">SM</span>
+            <span class="header-title">Sistem Manajemen</span>
+        </div>
+        <div class="header-right">
+            <span class="header-user">
+                <span class="user-icon">&#9679;</span>
+                <%= user.nama_pengguna %>
+                <span class="badge badge-<%= user.jabatan.toLowerCase() %>"><%= user.jabatan %></span>
+            </span>
+            <a href="/logout" class="btn btn-logout">Logout</a>
+        </div>
+    </header>
+    <!-- ====================================================
+         CONTAINER UTAMA (Sidebar + Content)
+         ==================================================== -->
+    <div class="container">
+        <!-- ================================================
+             SIDEBAR NAVIGASI
+             Menu ditampilkan sesuai jabatan user
+             ================================================ -->
+        <nav class="sidebar">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="/dashboard" class="<%= title === 'Dashboard' ? 'active' : '' %>">
+                        <span class="menu-icon">&#9632;</span> Dashboard
+                    </a>
+                </li>
+                <% if (ROLE_LEVEL[user.jabatan] >= ROLE_LEVEL['MANAGER']) { %>
+                <li>
+                    <a href="/kelola-user" class="<%= title === 'Kelola User' ? 'active' : '' %>">
+                        <span class="menu-icon">&#9670;</span> Kelola User
+                    </a>
+                </li>
+                <% } %>
+                <li>
+                    <a href="/aktivitas" class="<%= title === 'Log Aktivitas' ? 'active' : '' %>">
+                        <span class="menu-icon">&#9654;</span> Log Aktivitas
+                    </a>
+                </li>
+                <li>
+                    <a href="/riwayat-login" class="<%= title === 'Riwayat Login' ? 'active' : '' %>">
+                        <span class="menu-icon">&#9200;</span> Riwayat Login
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-info">
+                <p class="sidebar-info-label">Level Akses:</p>
+                <p class="sidebar-info-value"><%= user.jabatan %></p>
+            </div>
+        </nav>
+        <main class="content">
+            <%- body %>
+        </main>
+
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>

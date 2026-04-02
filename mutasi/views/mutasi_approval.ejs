@@ -1,0 +1,229 @@
+<!-- ============================================================
+     FILE: mutasi/views/mutasi_approval.ejs
+     FUNGSI: Halaman Approval Mutasi — untuk atasan baru
+     ALUR: GET /mutasi/approval → controller → render halaman ini
+
+     LAYOUT:
+     ┌────────────────────────────────────────────────┐
+     │ Header                                         │
+     ├──────────────┬─────────────────────────────────┤
+     │ Sidebar      │ Request Masuk:                  │
+     │              │ ┌──────────────────────────┐    │
+     │              │ │ Nama | Role | Approve/Rej│    │
+     │              │ └──────────────────────────┘    │
+     │              │                                 │
+     │              │ Riwayat Diproses:               │
+     │              │ ┌──────────────────────────┐    │
+     │              │ │ tabel riwayat            │    │
+     │              │ └──────────────────────────┘    │
+     └──────────────┴─────────────────────────────────┘
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+    <div class="page-header">
+        <h2 class="page-title">Approval Mutasi</h2>
+        <p class="page-desc">Setujui atau tolak permintaan bawahan yang ingin pindah ke bawah Anda.</p>
+    </div>
+
+    <!-- Notifikasi -->
+    <% if (pesan) { %>
+    <div class="alert alert-info"><%= pesan %></div>
+    <% } %>
+
+    <!-- ====================================================
+         REQUEST MASUK (PENDING)
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">
+            Request Masuk
+            <% if (requestMasuk.length > 0) { %>
+                <span class="badge badge-warning" style="margin-left: 8px;"><%= requestMasuk.length %></span>
+            <% } %>
+        </h3>
+
+        <% if (requestMasuk.length === 0) { %>
+            <p class="text-muted" style="padding: 12px 0;">Tidak ada permintaan mutasi yang menunggu persetujuan Anda.</p>
+        <% } else { %>
+            <div class="approval-list">
+                <% requestMasuk.forEach(function(r) { %>
+                <div class="approval-card">
+                    <div class="approval-card-info">
+                        <div class="approval-card-user">
+                            <strong><%= r.nama_pengguna %></strong>
+                            <span class="badge badge-<%= r.user_jabatan.toLowerCase() %>"><%= r.user_jabatan %></span>
+                            <span style="color: #95a5a6; font-size: 0.82rem;">@<%= r.user_name %></span>
+                        </div>
+                        <div class="approval-card-detail">
+                            Dari:
+                            <% if (r.old_parent_nama) { %>
+                                <strong><%= r.old_parent_nama %></strong>
+                                (<%= r.old_parent_jabatan %>)
+                            <% } else { %>
+                                <em>Belum ada atasan</em>
+                            <% } %>
+                            &rarr; Ke: <strong>Anda</strong>
+                        </div>
+                        <div class="approval-card-time">
+                            Diajukan: <%= r.created_at %>
+                        </div>
+                    </div>
+                    <div class="approval-card-actions">
+                        <form method="POST" action="/mutasi/approve" style="display: inline;"
+                              onsubmit="return confirm('Setujui mutasi <%= r.nama_pengguna %> ke bawah Anda?')">
+                            <input type="hidden" name="request_id" value="<%= r.id %>">
+                            <button type="submit" class="btn btn-sm btn-success">&#10003; Approve</button>
+                        </form>
+                        <form method="POST" action="/mutasi/reject" style="display: inline;"
+                              onsubmit="return confirm('Tolak mutasi <%= r.nama_pengguna %>?')">
+                            <input type="hidden" name="request_id" value="<%= r.id %>">
+                            <button type="submit" class="btn btn-sm btn-danger">&#10007; Reject</button>
+                        </form>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- ====================================================
+         RIWAYAT YANG SUDAH DIPROSES
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">Riwayat Diproses</h3>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Pemohon</th>
+                        <th>Jabatan</th>
+                        <th>Dari Atasan</th>
+                        <th>Status</th>
+                        <th>Diproses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (riwayatDiproses.length === 0) { %>
+                    <tr>
+                        <td colspan="6" class="text-center">Belum ada riwayat.</td>
+                    </tr>
+                    <% } else { %>
+                    <% riwayatDiproses.forEach(function(r, i) { %>
+                    <tr>
+                        <td><%= i + 1 %></td>
+                        <td><strong><%= r.nama_pengguna %></strong> <small>@<%= r.user_name %></small></td>
+                        <td><span class="badge badge-<%= r.user_jabatan.toLowerCase() %>"><%= r.user_jabatan %></span></td>
+                        <td><%= r.old_parent_nama || '-' %></td>
+                        <td>
+                            <% if (r.status === 'APPROVED') { %>
+                                <span class="badge badge-success">APPROVED</span>
+                            <% } else { %>
+                                <span class="badge badge-danger">REJECTED</span>
+                            <% } %>
+                        </td>
+                        <td class="nowrap"><%= r.approved_at || '-' %></td>
+                    </tr>
+                    <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         REQUEST PERUBAHAN REGION & DEPO (PENDING)
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">
+            Request Perubahan Region & Depo
+            <% if (depoRequestMasuk.length > 0) { %>
+                <span class="badge badge-warning" style="margin-left: 8px;"><%= depoRequestMasuk.length %></span>
+            <% } %>
+        </h3>
+
+        <% if (depoRequestMasuk.length === 0) { %>
+            <p class="text-muted" style="padding: 12px 0;">Tidak ada permintaan perubahan depo yang menunggu persetujuan Anda.</p>
+        <% } else { %>
+            <div class="approval-list">
+                <% depoRequestMasuk.forEach(function(r) { %>
+                <div class="approval-card">
+                    <div class="approval-card-info">
+                        <div class="approval-card-user">
+                            <strong><%= r.nama_pengguna %></strong>
+                            <span class="badge badge-<%= r.user_jabatan.toLowerCase() %>"><%= r.user_jabatan %></span>
+                            <span style="color: #95a5a6; font-size: 0.82rem;">@<%= r.user_name %></span>
+                        </div>
+                        <div class="approval-card-detail">
+                            Region: <strong><%= r.old_region || '<em>kosong</em>' %></strong> &rarr; <strong><%= r.new_region %></strong><br>
+                            Nama Depo: <strong><%= r.old_nama_depo || '<em>kosong</em>' %></strong> &rarr; <strong><%= r.new_nama_depo %></strong>
+                        </div>
+                        <div class="approval-card-time">
+                            Diajukan: <%= r.created_at %>
+                        </div>
+                    </div>
+                    <div class="approval-card-actions">
+                        <form method="POST" action="/mutasi/approve-depo" style="display: inline;"
+                              onsubmit="return confirm('Setujui perubahan depo <%= r.nama_pengguna %>?')">
+                            <input type="hidden" name="request_id" value="<%= r.id %>">
+                            <button type="submit" class="btn btn-sm btn-success">&#10003; Approve</button>
+                        </form>
+                        <form method="POST" action="/mutasi/reject-depo" style="display: inline;"
+                              onsubmit="return confirm('Tolak perubahan depo <%= r.nama_pengguna %>?')">
+                            <input type="hidden" name="request_id" value="<%= r.id %>">
+                            <button type="submit" class="btn btn-sm btn-danger">&#10007; Reject</button>
+                        </form>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- ====================================================
+         RIWAYAT PERUBAHAN DEPO YANG SUDAH DIPROSES
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">Riwayat Perubahan Depo</h3>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Pemohon</th>
+                        <th>Jabatan</th>
+                        <th>Region</th>
+                        <th>Nama Depo</th>
+                        <th>Status</th>
+                        <th>Diproses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (depoRiwayat.length === 0) { %>
+                    <tr>
+                        <td colspan="7" class="text-center">Belum ada riwayat.</td>
+                    </tr>
+                    <% } else { %>
+                    <% depoRiwayat.forEach(function(r, i) { %>
+                    <tr>
+                        <td><%= i + 1 %></td>
+                        <td><strong><%= r.nama_pengguna %></strong> <small>@<%= r.user_name %></small></td>
+                        <td><span class="badge badge-<%= r.user_jabatan.toLowerCase() %>"><%= r.user_jabatan %></span></td>
+                        <td><%= r.old_region || '-' %> &rarr; <%= r.new_region %></td>
+                        <td><%= r.old_nama_depo || '-' %> &rarr; <%= r.new_nama_depo %></td>
+                        <td>
+                            <% if (r.status === 'APPROVED') { %>
+                                <span class="badge badge-success">APPROVED</span>
+                            <% } else { %>
+                                <span class="badge badge-danger">REJECTED</span>
+                            <% } %>
+                        </td>
+                        <td class="nowrap"><%= r.approved_at || '-' %></td>
+                    </tr>
+                    <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<%- include('../../src/views/layout_footer') %>

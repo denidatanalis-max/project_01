@@ -1,0 +1,534 @@
+/* =============================================================
+   FILE: kalkulator/css/kalkulator.css
+   FUNGSI: Stylesheet khusus untuk modul Kalkulator Harga
+   ALUR: Dimuat oleh kalkulator.ejs via <link>
+   
+   CONVENTION: Semua class kalkulator diawali prefix "kalk-"
+   untuk menghindari tabrakan dengan style global
+   ============================================================= */
+
+/* =============================================================
+   KONTROL ATAS (Tipe Toko, Pembayaran, Voucher)
+   ============================================================= */
+.kalk-controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.kalk-control-item {
+    flex: 1;
+    min-width: 160px;
+    max-width: 240px;
+}
+
+/* =============================================================
+   LAYOUT UTAMA: 2 kolom (Produk | Keranjang)
+   ============================================================= */
+.kalk-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 20px;
+    align-items: start;
+}
+
+/* =============================================================
+   KOLOM PRODUK (kiri)
+   ============================================================= */
+.kalk-products-col {
+    min-width: 0;
+}
+
+/* Loading indicator */
+.kalk-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+/* ---- Accordion Grup ---- */
+.kalk-group {
+    margin-bottom: 8px;
+    border: 1px solid #e8ecf0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.kalk-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f7f9fc;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.kalk-group-header:hover {
+    background: #ebf5fb;
+}
+
+.kalk-group-header .kalk-group-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.kalk-group-header .kalk-group-count {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #7f8c8d;
+    background: #e8ecf0;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.kalk-group-arrow {
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+    color: #7f8c8d;
+}
+
+.kalk-group.open .kalk-group-arrow {
+    transform: rotate(90deg);
+}
+
+.kalk-group-body {
+    display: none;
+    padding: 8px;
+}
+
+.kalk-group.open .kalk-group-body {
+    display: block;
+}
+
+/* ---- Kartu Produk ---- */
+.kalk-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+.kalk-product-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid #e8ecf0;
+    border-radius: 8px;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.kalk-product-card:hover {
+    border-color: #3498db;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
+}
+
+.kalk-product-card.in-cart {
+    border-color: #3498db;
+    background: #f0f7ff;
+}
+
+.kalk-product-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1.3;
+}
+
+.kalk-product-code {
+    font-size: 0.75rem;
+    color: #95a5a6;
+}
+
+.kalk-product-price {
+    font-size: 0.85rem;
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.kalk-product-unit {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    font-weight: 400;
+}
+
+/* ---- Kontrol Qty di Kartu Produk ---- */
+.kalk-qty-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.kalk-qty-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.kalk-qty-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #7f8c8d;
+    min-width: 28px;
+}
+
+.kalk-qty-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #d5dbdb;
+    border-radius: 6px;
+    background: #f7f9fc;
+    color: #2c3e50;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: inherit;
+    line-height: 1;
+}
+
+.kalk-qty-btn:hover {
+    background: #3498db;
+    color: #fff;
+    border-color: #3498db;
+}
+
+.kalk-qty-input {
+    width: 48px;
+    height: 28px;
+    text-align: center;
+    border: 1px solid #d5dbdb;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-family: inherit;
+    outline: none;
+    color: #2c3e50;
+    padding: 0 4px;
+}
+
+.kalk-qty-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.15);
+}
+
+.kalk-add-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #3498db;
+    color: #fff;
+    transition: background 0.2s;
+    font-family: inherit;
+}
+
+.kalk-add-btn:hover {
+    background: #2980b9;
+}
+
+.kalk-add-btn.in-cart {
+    background: #e74c3c;
+}
+
+.kalk-add-btn.in-cart:hover {
+    background: #c0392b;
+}
+
+/* =============================================================
+   KOLOM KERANJANG (kanan)
+   ============================================================= */
+.kalk-cart-col {
+    position: sticky;
+    top: 80px;
+}
+
+.kalk-cart-badge {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #3498db;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ---- Daftar item keranjang ---- */
+.kalk-empty-cart {
+    text-align: center;
+    padding: 30px 16px;
+    color: #95a5a6;
+    font-size: 0.88rem;
+    font-style: italic;
+}
+
+.kalk-cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f2f5;
+    gap: 8px;
+}
+
+.kalk-cart-item:last-child {
+    border-bottom: none;
+}
+
+.kalk-cart-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.kalk-cart-item-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2c3e50;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kalk-cart-item-detail {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    margin-top: 2px;
+}
+
+.kalk-cart-item-qty {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3498db;
+    white-space: nowrap;
+    min-width: 50px;
+    text-align: right;
+}
+
+.kalk-cart-item-remove {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.kalk-cart-item-remove:hover {
+    background: #fadbd8;
+}
+
+/* ---- Tombol aksi keranjang ---- */
+.kalk-cart-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #e8ecf0;
+}
+
+.kalk-cart-actions .btn {
+    flex: 1;
+}
+
+/* =============================================================
+   HASIL PERHITUNGAN
+   ============================================================= */
+.kalk-calc-result {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.kalk-calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #34495e;
+    padding: 4px 0;
+}
+
+.kalk-amount {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.kalk-discount {
+    color: #e74c3c;
+}
+
+.kalk-calc-total {
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 2px solid #e8ecf0;
+    font-size: 0.92rem;
+}
+
+.kalk-calc-total .kalk-amount {
+    color: #27ae60;
+}
+
+.kalk-calc-final {
+    padding-top: 8px;
+    border-top: 2px solid #3498db;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.kalk-calc-final .kalk-amount {
+    color: #2c3e50;
+    font-size: 1.05rem;
+}
+
+/* =============================================================
+   FLOATING CART BUTTON (Mobile Only)
+   ============================================================= */
+.kalk-floating-cart {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #3498db;
+    color: #fff;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 800;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kalk-floating-cart:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(52, 152, 219, 0.5);
+}
+
+.kalk-floating-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .kalk-layout {
+        grid-template-columns: 1fr 340px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .kalk-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .kalk-cart-col {
+        position: static;
+    }
+
+    .kalk-product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .kalk-controls {
+        flex-direction: column;
+    }
+
+    .kalk-control-item {
+        max-width: 100%;
+    }
+
+    /* Sembunyikan keranjang di mobile, pakai floating button */
+    .kalk-cart-col {
+        display: none;
+    }
+
+    .kalk-cart-col.show {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 950;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .kalk-cart-col.show .section {
+        max-width: 400px;
+        margin: 60px auto 20px;
+    }
+
+    .kalk-floating-cart {
+        display: flex !important;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .kalk-qty-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .kalk-qty-group {
+        justify-content: center;
+    }
+
+    .kalk-add-btn {
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+    }
+}

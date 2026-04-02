@@ -1,0 +1,52 @@
+<!-- ============================================================
+     FILE: src/views/aktivitas.ejs
+     FUNGSI: Halaman log aktivitas user
+     ALUR: GET /aktivitas → controller → render halaman ini
+     Data ditampilkan berdasarkan level jabatan:
+       BOS     → semua aktivitas
+       MANAGER → aktivitas RBM, BM, ASS + sendiri
+       RBM     → aktivitas BM, ASS + sendiri
+       BM      → aktivitas ASS + sendiri
+       ASS     → aktivitas sendiri saja
+     ============================================================ -->
+<%- include('layout_header') %>
+
+    <div class="page-header">
+        <h2 class="page-title">Log Aktivitas</h2>
+        <p class="page-desc">Daftar user dan last login terakhir.</p>
+    </div>
+
+    <div class="section">
+        <div class="table-wrapper">
+            <table class="data-table" id="tabelAktivitas">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Username</th>
+                        <th>Nama</th>
+                        <th>Last Login</th>
+                        <th>Jabatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (logs.length === 0) { %>
+                    <tr>
+                        <td colspan="5" class="text-center">Belum ada data.</td>
+                    </tr>
+                    <% } else { %>
+                        <% logs.forEach(function(log, i) { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+                            <td><%= log.user_name %></td>
+                            <td><%= log.nama_pengguna %></td>
+                            <td class="nowrap"><%= log.last_login || 'Belum pernah login' %></td>
+                            <td><span class="badge badge-<%= log.jabatan.toLowerCase() %>"><%= log.jabatan %></span></td>
+                        </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<%- include('layout_footer') %>

@@ -1,0 +1,81 @@
+<!-- ============================================================
+     FILE: user_auth/views/login.ejs
+     FUNGSI: Halaman login (tidak pakai layout — standalone)
+     ALUR: GET /login → render halaman ini
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — PMA Sales</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+
+    <div class="login-container">
+
+        <!-- Logo & Judul -->
+        <div class="login-header">
+            <img src="./img/pma.png" alt="PMA Logo" class="login-logo"><span>PT PINUS MERAH ABADI</span>
+            <h1 class="login-title">PMA Sales System</h1>
+        </div>
+
+        <!-- Pesan info/error -->
+        <% if (pesan) { %>
+            <div class="alert
+                <% if (pesan === 'berhasil_logout') { %> alert-success
+                <% } else if (pesan === 'sesi_habis') { %> alert-warning
+                <% } else { %> alert-danger <% } %>
+            ">
+                <% if (pesan === 'berhasil_logout') { %>
+                    Anda berhasil logout.
+                <% } else if (pesan === 'sesi_habis') { %>
+                    Sesi Anda telah berakhir. Anda mungkin login di perangkat lain.
+                <% } else { %>
+                    <%= pesan %>
+                <% } %>
+            </div>
+        <% } %>
+
+        <!-- Form Login -->
+        <form method="POST" action="/login" class="login-form">
+
+            <div class="form-group">
+                <label for="user_name" class="form-label">Username</label>
+                <input
+                    type="text"
+                    id="user_name"
+                    name="user_name"
+                    class="form-input"
+                    placeholder="Masukkan username"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Masukkan password"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-login">Masuk</button>
+
+        </form>
+
+        <div class="login-footer">
+            <p>&copy; 2026 Sistem PMA SALES</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

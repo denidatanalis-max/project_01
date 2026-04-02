@@ -1,0 +1,476 @@
+<%- include('../../src/views/layout_header') %>
+
+<div class="page-header">
+    <h2 class="page-title">Dashboard Stock</h2>
+    <p class="page-desc">Informasi Stock Barang.</p>
+</div>
+
+<div class="section">
+    <% if (stockFile) { %>
+
+        <!-- ====================================================
+             FILTER: Region, SKU, Description
+             ==================================================== -->
+        <div class="stock-filter-bar">
+            <div class="stock-filter-group">
+                <label for="filterRegion">Region</label>
+                <select id="filterRegion" onchange="applyFilters()">
+                    <option value="">-- Semua Region --</option>
+                </select>
+            </div>
+            <div class="stock-filter-group">
+                <label for="filterSKU">SKU</label>
+                <select id="filterSKU" onchange="applyFilters()">
+                    <option value="">-- Semua SKU --</option>
+                </select>
+            </div>
+            <div class="stock-filter-group">
+                <label for="filterDesc">Description</label>
+                <select id="filterDesc" onchange="applyFilters()">
+                    <option value="">-- Semua Description --</option>
+                </select>
+            </div>
+            <div class="stock-filter-group stock-filter-actions" style="align-self: flex-end;">
+                <button class="btn btn-sm btn-secondary" onclick="resetFilters()">Reset Filter</button>
+                <button class="btn btn-sm btn-success" onclick="exportToExcel()">&#128229; Export Excel</button>
+            </div>
+        </div>
+
+        <p class="stock-result-info" id="stockResultInfo"></p>
+
+        <!-- ====================================================
+             TABEL STOCK
+             ==================================================== -->
+        <div class="table-wrapper">
+            <table class="data-table" id="stockTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <% columns.forEach(function(col, idx) { %>
+                            <th class="sortable-th" onclick="sortByColumn(<%= idx %>)">
+                                <span class="th-label"><%= col %></span>
+                                <span class="sort-icon" id="sortIcon_<%= idx %>">&#8693;</span>
+                            </th>
+                        <% }) %>
+                    </tr>
+                </thead>
+                <tbody id="stockBody">
+                    <!-- Diisi oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+    <% } else { %>
+        <p style="color: #7f8c8d; text-align: center; padding: 40px 0;">
+            &#128679; Belum ada file Stock tersedia.
+        </p>
+    <% } %>
+</div>
+
+<div style="margin-top: 16px;">
+    <a href="/pencapaian" class="btn btn-secondary">&larr; Kembali ke Pencapaian</a>
+</div>
+
+<% if (stockFile) { %>
+<script>
+    // Data dari server
+    var allRows   = <%- JSON.stringify(rows) %>;
+    var columns   = <%- JSON.stringify(columns) %>;
+
+    // Kolom filter
+    var COL_REGION = 'region';
+    var COL_SKU    = 'SKU';
+    var COL_DESC   = 'Description';
+
+    // Inisialisasi opsi dropdown dari data unik
+    function initFilterOptions() {
+        populateSelect('filterRegion', getUnique(COL_REGION));
+        populateSelect('filterSKU',    getUnique(COL_SKU));
+        populateSelect('filterDesc',   getUnique(COL_DESC));
+    }
+
+    function getUnique(col) {
+        var seen = {};
+        var result = [];
+        for (var i = 0; i < allRows.length; i++) {
+            var val = String(allRows[i][col] || '').trim();
+            if (val && !seen[val]) {
+                seen[val] = true;
+                result.push(val);
+            }
+        }
+        return result.sort();
+    }
+
+    function populateSelect(id, values) {
+        var sel = document.getElementById(id);
+        var current = sel.value;
+        // Simpan option pertama (placeholder)
+        var placeholder = sel.options[0].outerHTML;
+        sel.innerHTML = placeholder;
+        for (var i = 0; i < values.length; i++) {
+            var opt = document.createElement('option');
+            opt.value = values[i];
+            opt.textContent = values[i];
+            sel.appendChild(opt);
+        }
+        sel.value = current;
+    }
+
+    function applyFilters() {
+        var fRegion = document.getElementById('filterRegion').value;
+        var fSKU    = document.getElementById('filterSKU').value;
+        var fDesc   = document.getElementById('filterDesc').value;
+
+        var filtered = allRows.filter(function(row) {
+            if (fRegion && String(row[COL_REGION] || '').trim() !== fRegion) return false;
+            if (fSKU    && String(row[COL_SKU]    || '').trim() !== fSKU)    return false;
+            if (fDesc   && String(row[COL_DESC]   || '').trim() !== fDesc)   return false;
+            return true;
+        });
+
+        renderTable(filtered);
+
+        // Update dropdown SKU & Description berdasarkan filter aktif
+        updateDependentSelects(filtered);
+    }
+
+    function updateDependentSelects(filtered) {
+        var fRegion = document.getElementById('filterRegion').value;
+        var fSKU    = document.getElementById('filterSKU').value;
+        var fDesc   = document.getElementById('filterDesc').value;
+
+        // Setelah filter region, update SKU & Description options
+        var baseForSKU = allRows.filter(function(row) {
+            if (fRegion && String(row[COL_REGION] || '').trim() !== fRegion) return false;
+            if (fDesc   && String(row[COL_DESC]   || '').trim() !== fDesc)   return false;
+            return true;
+        });
+        populateSelect('filterSKU', getUniqueFrom(baseForSKU, COL_SKU));
+        document.getElementById('filterSKU').value = fSKU;
+
+        var baseForDesc = allRows.filter(function(row) {
+            if (fRegion && String(row[COL_REGION] || '').trim() !== fRegion) return false;
+            if (fSKU    && String(row[COL_SKU]    || '').trim() !== fSKU)    return false;
+            return true;
+        });
+        populateSelect('filterDesc', getUniqueFrom(baseForDesc, COL_DESC));
+        document.getElementById('filterDesc').value = fDesc;
+
+        var baseForRegion = allRows.filter(function(row) {
+            if (fSKU  && String(row[COL_SKU]  || '').trim() !== fSKU)  return false;
+            if (fDesc && String(row[COL_DESC] || '').trim() !== fDesc) return false;
+            return true;
+        });
+        populateSelect('filterRegion', getUniqueFrom(baseForRegion, COL_REGION));
+        document.getElementById('filterRegion').value = fRegion;
+    }
+
+    function getUniqueFrom(data, col) {
+        var seen = {};
+        var result = [];
+        for (var i = 0; i < data.length; i++) {
+            var val = String(data[i][col] || '').trim();
+            if (val && !seen[val]) {
+                seen[val] = true;
+                result.push(val);
+            }
+        }
+        return result.sort();
+    }
+
+    function resetFilters() {
+        document.getElementById('filterRegion').value = '';
+        document.getElementById('filterSKU').value    = '';
+        document.getElementById('filterDesc').value   = '';
+        initFilterOptions();
+        renderTable(allRows);
+    }
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
+
+    function formatNumber(val) {
+        if (val === '' || val === null || val === undefined) return '';
+        var n = Number(val);
+        if (isNaN(n)) return escapeHtml(String(val));
+        return n.toLocaleString('id-ID');
+    }
+
+    var numberCols = { 'High(CTN)': 1, 'Middle(PAC)': 1, 'Low(PCS)': 1, 'Total in PCS': 1, 'Total in CTN': 1 };
+
+    function renderTable(data) {
+        var tbody = document.getElementById('stockBody');
+        var info  = document.getElementById('stockResultInfo');
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="' + (columns.length + 1) + '" class="text-center">Tidak ada data yang cocok.</td></tr>';
+            info.textContent = '0 baris ditemukan';
+            return;
+        }
+
+        info.textContent = data.length.toLocaleString('id-ID') + ' baris ditemukan';
+
+        var html = '';
+        for (var i = 0; i < data.length; i++) {
+            html += '<tr>';
+            html += '<td>' + (i + 1) + '</td>';
+            for (var j = 0; j < columns.length; j++) {
+                var col = columns[j];
+                var val = data[i][col];
+                if (numberCols[col]) {
+                    html += '<td style="text-align:right;">' + formatNumber(val) + '</td>';
+                } else {
+                    html += '<td>' + escapeHtml(String(val ?? '')) + '</td>';
+                }
+            }
+            html += '</tr>';
+        }
+        tbody.innerHTML = html;
+    }
+
+    // ====== SORT ======
+    var currentSortCol   = -1;  // index kolom yang di-sort
+    var currentSortOrder = '';  // 'asc' atau 'desc'
+
+    function sortByColumn(colIdx) {
+        var colName = columns[colIdx];
+
+        // Toggle: none → asc → desc → none
+        if (currentSortCol === colIdx) {
+            if (currentSortOrder === 'asc') {
+                currentSortOrder = 'desc';
+            } else if (currentSortOrder === 'desc') {
+                currentSortOrder = '';
+                currentSortCol = -1;
+            } else {
+                currentSortOrder = 'asc';
+            }
+        } else {
+            currentSortCol   = colIdx;
+            currentSortOrder = 'asc';
+        }
+
+        // Update icon semua kolom
+        for (var i = 0; i < columns.length; i++) {
+            var icon = document.getElementById('sortIcon_' + i);
+            if (!icon) continue;
+            if (i === currentSortCol && currentSortOrder === 'asc') {
+                icon.innerHTML = '&#9650;'; // ▲
+                icon.className = 'sort-icon sort-active';
+            } else if (i === currentSortCol && currentSortOrder === 'desc') {
+                icon.innerHTML = '&#9660;'; // ▼
+                icon.className = 'sort-icon sort-active';
+            } else {
+                icon.innerHTML = '&#8693;'; // ⇕
+                icon.className = 'sort-icon';
+            }
+        }
+
+        // Sort atau reset
+        var dataToRender;
+        if (currentSortOrder === '') {
+            // Reset: tampilkan ulang data filter tanpa sort
+            dataToRender = currentFilteredData.slice();
+        } else {
+            var isNum = !!numberCols[colName];
+            var dir   = currentSortOrder === 'asc' ? 1 : -1;
+
+            dataToRender = currentFilteredData.slice().sort(function(a, b) {
+                var va = a[colName];
+                var vb = b[colName];
+
+                if (isNum) {
+                    var na = (va === '' || va === null || va === undefined) ? -Infinity : Number(va);
+                    var nb = (vb === '' || vb === null || vb === undefined) ? -Infinity : Number(vb);
+                    if (isNaN(na)) na = -Infinity;
+                    if (isNaN(nb)) nb = -Infinity;
+                    return (na - nb) * dir;
+                } else {
+                    var sa = String(va || '').toLowerCase();
+                    var sb = String(vb || '').toLowerCase();
+                    if (sa < sb) return -1 * dir;
+                    if (sa > sb) return  1 * dir;
+                    return 0;
+                }
+            });
+        }
+
+        // Render tanpa mengubah currentFilteredData
+        _origRenderTable(dataToRender);
+    }
+
+    // Reset sort saat filter berubah
+    function resetSortIcons() {
+        currentSortCol = -1;
+        currentSortOrder = '';
+        for (var i = 0; i < columns.length; i++) {
+            var icon = document.getElementById('sortIcon_' + i);
+            if (icon) {
+                icon.innerHTML = '&#8693;';
+                icon.className = 'sort-icon';
+            }
+        }
+    }
+
+    // Simpan data yang sedang ditampilkan untuk export
+    var currentFilteredData = allRows;
+
+    // Override renderTable untuk track filtered data + reset sort
+    var _origRenderTable = renderTable;
+    renderTable = function(data) {
+        currentFilteredData = data;
+        resetSortIcons();
+        _origRenderTable(data);
+    };
+
+    function exportToExcel() {
+        if (!currentFilteredData || currentFilteredData.length === 0) {
+            alert('Tidak ada data untuk di-export.');
+            return;
+        }
+
+        // Buat data array: header + rows
+        var exportData = [columns.slice()]; // header row
+        for (var i = 0; i < currentFilteredData.length; i++) {
+            var row = [];
+            for (var j = 0; j < columns.length; j++) {
+                var val = currentFilteredData[i][columns[j]];
+                // Biarkan angka tetap angka untuk Excel
+                if (numberCols[columns[j]] && val !== '' && val !== null && val !== undefined) {
+                    var num = Number(val);
+                    row.push(isNaN(num) ? val : num);
+                } else {
+                    row.push(val ?? '');
+                }
+            }
+            exportData.push(row);
+        }
+
+        // Buat workbook & worksheet menggunakan SheetJS (di-bundle client-side)
+        var ws = XLSX.utils.aoa_to_sheet(exportData);
+
+        // Auto-width kolom
+        var colWidths = columns.map(function(col, idx) {
+            var maxLen = col.length;
+            for (var r = 0; r < Math.min(currentFilteredData.length, 100); r++) {
+                var cellVal = String(currentFilteredData[r][col] ?? '');
+                if (cellVal.length > maxLen) maxLen = cellVal.length;
+            }
+            return { wch: Math.min(maxLen + 2, 40) };
+        });
+        ws['!cols'] = colWidths;
+
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Stock');
+
+        // Generate filename dengan info filter
+        var parts = ['Stock'];
+        var fRegion = document.getElementById('filterRegion').value;
+        var fSKU    = document.getElementById('filterSKU').value;
+        var fDesc   = document.getElementById('filterDesc').value;
+        if (fRegion) parts.push(fRegion);
+        if (fSKU)    parts.push('SKU_' + fSKU);
+        if (fDesc)   parts.push(fDesc.substring(0, 30));
+        var filename = parts.join('_').replace(/[^a-zA-Z0-9_\-]/g, '_') + '.xlsx';
+
+        XLSX.writeFile(wb, filename);
+    }
+
+    // Init
+    initFilterOptions();
+    renderTable(allRows);
+</script>
+
+<!-- SheetJS CDN untuk export Excel di client -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<style>
+    .stock-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 14px 16px;
+        background: #f7f9fc;
+        border-radius: 8px;
+        border: 1px solid #e8ecf0;
+        align-items: flex-end;
+    }
+    .stock-filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 50px;
+        flex: 1;
+    }
+    .stock-filter-group label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .stock-filter-group select {
+        padding: 7px 10px;
+        border: 1px solid #dce1e8;
+        border-radius: 6px;
+        font-size: 0.88rem;
+        background: #fff;
+        color: #2c3e50;
+        outline: none;
+    }
+    .stock-filter-group select:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52,152,219,0.15);
+    }
+    .stock-result-info {
+        font-size: 0.82rem;
+        color: #7f8c8d;
+        margin-bottom: 8px;
+    }
+    .stock-filter-actions {
+        flex-direction: row !important;
+        gap: 8px !important;
+        min-width: auto !important;
+        flex: 0 !important;
+    }
+    .btn-success {
+        background: #27ae60;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        padding: 7px 14px;
+        font-size: 0.85rem;
+    }
+    .btn-success:hover {
+        background: #219a52;
+    }
+    /* Sort header */
+    .sortable-th {
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+    }
+    .sortable-th:hover {
+        background: #edf1f7;
+    }
+    .th-label {
+        margin-right: 4px;
+    }
+    .sort-icon {
+        font-size: 0.7rem;
+        color: #bdc3c7;
+        vertical-align: middle;
+    }
+    .sort-icon.sort-active {
+        color: #2980b9;
+    }
+</style>
+<% } %>
+
+<%- include('../../src/views/layout_footer') %>

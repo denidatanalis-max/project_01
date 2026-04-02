@@ -1,0 +1,97 @@
+<!-- ============================================================
+     FILE: src/views/layout_header.ejs
+     FUNGSI: Bagian atas layout (header + top navbar + content)
+     ALUR: Include oleh setiap halaman yang pakai layout
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> — PT PMA</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- HEADER / NAVBAR UTAMA -->
+    <header class="header">
+        <div class="header-left">
+            <img src="/img/pma.png" alt="PMA Logo" width="30" height="40">
+            <span class="header-title">PMA Sales System</span>
+        </div>
+        <div class="header-right">
+            <span class="header-user">
+                <span class="user-icon">&#9679;</span>
+                <%= user.nama_pengguna %>
+                <span class="badge badge-<%= user.jabatan.toLowerCase() %>"><%= user.jabatan %></span>
+            </span>
+            <a href="/logout" class="btn btn-logout">Logout</a>
+        </div>
+        <!-- Hamburger untuk mobile -->
+        <button class="topnav-toggle" id="topnavToggle" type="button">&#9776;</button>
+    </header>
+
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="topnav" id="topnav">
+        <ul class="topnav-menu">
+
+            <% if (user.is_admin) { %>
+            <!-- ========== MENU ADMIN ========== -->
+            <li><a href="/admin" class="<%= title === 'Dashboard Admin' ? 'active' : '' %>"><span class="menu-icon">&#9632;</span> Dashboard</a></li>
+            <li><a href="/admin/kelola-user" class="<%= title === 'Kelola User' ? 'active' : '' %>"><span class="menu-icon">&#9670;</span> Kelola User</a></li>
+            <li><a href="/admin/aktivitas" class="<%= title === 'Log Aktivitas' ? 'active' : '' %>"><span class="menu-icon">&#9654;</span> Log Aktivitas</a></li>
+            <li><a href="/admin/riwayat-login" class="<%= title === 'Riwayat Login' ? 'active' : '' %>"><span class="menu-icon">&#9200;</span> Riwayat Login</a></li>
+            <% } else if (user.jabatan === 'SA') { %>
+            <!-- ========== MENU SA ========== -->
+            <li><a href="/sa/dashboard" class="<%= title === 'Dashboard SA' ? 'active' : '' %>"><span class="menu-icon">&#9632;</span> Dashboard</a></li>
+            <!-- <li><a href="/sa/upload-data" class="<%= title === 'Upload Data' ? 'active' : '' %>"><span class="menu-icon">&#128228;</span> Upload Data</a></li> -->
+            <% } else { %>
+            <!-- ========== MENU USER BIASA ========== -->
+            <li><a href="/beranda" class="<%= title === 'Beranda' ? 'active' : '' %>"><span class="menu-icon">&#9733;</span> Beranda</a></li>
+            <li class="has-dropdown <%= ['Halaman Pencapaian','Target','LPH','ScoreCard','MPP','Stock'].includes(title) ? 'active-parent' : '' %>">
+                <a href="#" class="dropdown-toggle <%= ['Halaman Pencapaian','Target','LPH','ScoreCard','MPP','Stock'].includes(title) ? 'active' : '' %>">
+                    <span class="menu-icon">&#9632;</span> Pencapaian
+                    <span class="dropdown-arrow">&#9662;</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="/pencapaian" class="<%= title === 'Halaman Pencapaian' ? 'active' : '' %>">Dashboard</a></li>
+                    <li><a href="/pencapaian/lph" class="<%= title === 'LPH' ? 'active' : '' %>">LPH</a></li>
+                    <li><a href="/pencapaian/scorecard" class="<%= title === 'ScoreCard' ? 'active' : '' %>">ScoreCard</a></li>
+                    <li><a href="/pencapaian/mpp" class="<%= title === 'MPP' ? 'active' : '' %>">MPP</a></li>
+                    <li><a href="/pencapaian/stock" class="<%= title === 'Stock' ? 'active' : '' %>">Stock</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="/kalkulator" class="<%= title === 'Kalkulator Harga' ? 'active' : '' %>">
+                    <span class="menu-icon">&#9881;</span> Kalkulator
+                </a>
+            </li>
+            <li>
+                <a href="/games" class="<%= title === 'Halaman Games' ? 'active' : '' %>">
+                    <span class="menu-icon">&#127918;</span> Games
+                </a>
+            </li>
+            <li class="has-dropdown <%= ['Mutasi Atasan','Approval Mutasi','Riwayat Proses'].includes(title) ? 'active-parent' : '' %>">
+                <a href="#" class="dropdown-toggle <%= ['Mutasi Atasan','Approval Mutasi','Riwayat Proses'].includes(title) ? 'active' : '' %>">
+                    <span class="menu-icon">&#8693;</span> Mutasi
+                    <span class="dropdown-arrow">&#9662;</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="/mutasi" class="<%= title === 'Mutasi Atasan' ? 'active' : '' %>">Mutasi Atasan</a></li>
+                    <li><a href="/mutasi/approval" class="<%= title === 'Approval Mutasi' ? 'active' : '' %>">Request Masuk</a></li>
+                    <li><a href="/mutasi/history" class="<%= title === 'Riwayat Proses' ? 'active' : '' %>">Riwayat Proses</a></li>
+                </ul>
+            </li>
+            <% } %>
+
+        </ul>
+        <!-- <div class="topnav-info">
+            <span class="topnav-info-label"><%= user.is_admin ? 'Mode:' : 'Akses:' %></span>
+            <span class="topnav-info-value"><%= user.is_admin ? 'Admin' : user.jabatan %></span>
+        </div> -->
+    </nav>
+
+    <!-- CONTAINER UTAMA (full width, no sidebar) -->
+    <div class="container">
+        <!-- KONTEN UTAMA -->
+        <main class="content">

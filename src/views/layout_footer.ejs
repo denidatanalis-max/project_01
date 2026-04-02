@@ -1,0 +1,68 @@
+<!-- ============================================================
+     FILE: src/views/layout_footer.ejs
+     FUNGSI: Bagian bawah layout (penutup content + sidebar + script)
+     ALUR: Include oleh setiap halaman yang pakai layout
+     ============================================================ -->
+        </main>
+    </div>
+    <script src="/js/script.js"></script>
+
+    <!-- ======================================================
+         SOCKET.IO CLIENT:
+         1. Register user ke room (per user_id + admin/user dashboard)
+         2. Listen force_logout → redirect ke login
+         3. Listen online_count_update → update UI jika ada fungsi
+         ====================================================== -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        (function() {
+            var socket = io();
+
+            // aman jika user belum ada
+            var currentUserId = <%= JSON.stringify(user ? user.id : null) %>;
+            var isAdmin = <%= JSON.stringify(user ? !!user.is_admin : false) %>;
+
+            socket.emit('register', {
+                userId: currentUserId,
+                isAdmin: isAdmin
+            });
+
+            // Force logout — device lama langsung redirect
+            socket.on('force_logout', function(data) {
+                var pesan = (data && data.pesan) ? data.pesan : 'Akun Anda login di perangkat lain.';
+                alert(pesan);
+                window.location.href = '/login?pesan=sesi_habis';
+            });
+
+            // Real-time online update — re-fetch dari API (backend RBAC)
+            // Admin dashboard & beranda mendefinisikan updateOnlineUI()
+            socket.on('online_count_update', function() {
+                if (typeof updateOnlineUI === 'function') {
+                    fetch('/api/online-users')
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) { updateOnlineUI(data); });
+                }
+            });
+
+            // Expose socket ke global untuk halaman yang butuh
+            window._socket = socket;
+        })();
+
+        // ==========================================================
+        // HEARTBEAT: Kirim sinyal ke server setiap 60 detik
+        // Update last_online di tabel users (REPLACE, data kecil)
+        // Jika browser ditutup → heartbeat berhenti → offline setelah 1 menit
+        // ==========================================================
+        (function() {
+            function kirimHeartbeat() {
+                fetch('/api/heartbeat', { method: 'POST', keepalive: true })
+                    .catch(function() {}); // abaikan error (offline / tab hibernate)
+            }
+            // Kirim segera saat halaman load
+            kirimHeartbeat();
+            // Ulangi setiap 60 detik
+            setInterval(kirimHeartbeat, 60000);
+        })();
+    </script>
+</body>
+</html>

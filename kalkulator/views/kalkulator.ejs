@@ -1,0 +1,149 @@
+<!-- ============================================================
+     FILE: kalkulator/views/kalkulator.ejs
+     FUNGSI: Halaman utama modul Kalkulator Harga
+     ALUR: GET /kalkulator → controller → render halaman ini
+
+     LAYOUT:
+     ┌─────────────────────────────────────────────────┐
+     │ Header (pakai layout project)                   │
+     ├──────────────────────┬──────────────────────────┤
+     │ Sidebar (project)    │ Konten Kalkulator        │
+     │                      │ ┌───────────┬──────────┐ │
+     │                      │ │ Daftar    │ Keranjang│ │
+     │                      │ │ Produk    │ + Hitung │ │
+     │                      │ │ (Accordion│          │ │
+     │                      │ │  per grup)│ Hasil:   │ │
+     │                      │ │           │ Gross    │ │
+     │                      │ │           │ Diskon   │ │
+     │                      │ │           │ Nett     │ │
+     │                      │ │           │ Final    │ │
+     │                      │ └───────────┴──────────┘ │
+     └──────────────────────┴──────────────────────────┘
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+    <!-- Judul halaman -->
+    <div class="page-header">
+        <h2 class="page-title">Kalkulator Harga</h2>
+        <p class="page-desc">Simulasi order — pilih produk, atur qty, lihat perhitungan diskon.</p>
+    </div>
+    <!-- ====================================================
+         KONTROL: Tipe Toko dan Metode Bayar
+         ==================================================== -->
+    <div class="kalk-controls">
+        <div class="kalk-control-item">
+            <label class="form-label" for="kalk-store-type">Tipe Toko</label>
+            <select id="kalk-store-type" class="form-input">
+                <option value="grosir" selected>Grosir</option>
+                <option value="retail">Retail</option>
+            </select>
+        </div>
+        <div class="kalk-control-item">
+            <label class="form-label" for="kalk-payment">Pembayaran</label>
+            <select id="kalk-payment" class="form-input">
+                <option value="COD" selected>COD</option>
+                <option value="CBD">CBD</option>
+            </select>
+        </div>
+        <div class="kalk-control-item">
+            <label class="form-label" for="kalk-voucher">Voucher (Rp)</label>
+            <input type="number" id="kalk-voucher" class="form-input" value="0" min="0">
+        </div>
+    </div>
+    <!-- ====================================================
+         LAYOUT UTAMA: Produk (kiri) + Keranjang (kanan)
+         ==================================================== -->
+    <div class="kalk-layout">
+        <!-- ================================================
+             KOLOM KIRI: Daftar Produk (Accordion per Grup)
+             Produk dirender oleh JavaScript dari API
+             ================================================ -->
+        <div class="kalk-products-col">
+            <div class="section">
+                <h3 class="section-title">Daftar Produk</h3>
+                <div id="kalk-product-groups">
+                    <div class="kalk-loading">
+                        <p>Memuat data produk...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================
+             KOLOM KANAN: Keranjang + Hasil Kalkulasi
+             ================================================ -->
+        <div class="kalk-cart-col">
+
+            <!-- Keranjang -->
+            <div class="section">
+                <h3 class="section-title">
+                    Keranjang
+                    <span class="kalk-cart-badge" id="kalk-cart-count">0</span>
+                </h3>
+                <div id="kalk-cart-items">
+                    <div class="kalk-empty-cart">Belum ada produk di keranjang</div>
+                </div>
+                <div class="kalk-cart-actions">
+                    <button type="button" class="btn btn-danger btn-sm" id="kalk-btn-reset">Reset</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="kalk-btn-hitung">Hitung</button>
+                </div>
+            </div>
+
+            <!-- Hasil Perhitungan -->
+            <div class="section">
+                <h3 class="section-title">Hasil Perhitungan</h3>
+                <div class="kalk-calc-result">
+                    <div class="kalk-calc-row">
+                        <span>Total Gross:</span>
+                        <span class="kalk-amount" id="kalk-total-gross">Rp 0</span>
+                    </div>
+                    <div class="kalk-calc-row">
+                        <span>Diskon Reguler:</span>
+                        <span class="kalk-amount kalk-discount" id="kalk-diskon-reguler">- Rp 0</span>
+                    </div>
+                    <div class="kalk-calc-row">
+                        <span>Pot. Strata:</span>
+                        <span class="kalk-amount kalk-discount" id="kalk-diskon-strata">- Rp 0</span>
+                    </div>
+                    <div class="kalk-calc-row">
+                        <span>Program Kawin:</span>
+                        <span class="kalk-amount kalk-discount" id="kalk-diskon-bundle">- Rp 0</span>
+                    </div>
+                    <div class="kalk-calc-row">
+                        <span>Promo Flush Out:</span>
+                        <span class="kalk-amount kalk-discount" id="kalk-diskon-flush">- Rp 0</span>
+                    </div>
+                    <div class="kalk-calc-row">
+                        <span>Promo Gratis Produk:</span>
+                        <span class="kalk-amount kalk-discount" id="kalk-diskon-free">- Rp 0</span>
+                    </div>
+                    <div class="kalk-calc-row">
+                        <span>Diskon Invoice:</span>
+                        <span class="kalk-amount kalk-discount" id="kalk-diskon-invoice">- Rp 0</span>
+                    </div>
+                    <div class="kalk-calc-row kalk-calc-total">
+                        <span><strong>Total Harga Nett:</strong></span>
+                        <span class="kalk-amount" id="kalk-total-nett"><strong>Rp 0</strong></span>
+                    </div>
+                    <div class="kalk-calc-row kalk-calc-final">
+                        <span><strong>Final Tagihan:</strong></span>
+                        <span class="kalk-amount" id="kalk-final-tagihan"><strong>Rp 0</strong></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Floating cart button (mobile) -->
+    <button type="button" class="kalk-floating-cart" id="kalk-floating-cart" style="display:none;">
+        <span>&#128722;</span>
+        <span class="kalk-floating-badge" id="kalk-floating-badge">0</span>
+    </button>
+
+<%- include('../../src/views/layout_footer') %>
+
+<!-- CSS dan JS khusus kalkulator -->
+<link rel="stylesheet" href="/kalkulator/css/kalkulator.css">
+<script src="/kalkulator/js/kalkulator.js"></script>

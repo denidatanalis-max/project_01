@@ -1,0 +1,39 @@
+<!-- ============================================================
+     FILE: src/views/error.ejs
+     FUNGSI: Halaman error (404, 403, 500)
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> — PT PMA</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo" style="background-color: #e74c3c;">!</div>
+            <h1 class="login-title"><%= title %></h1>
+            <p class="login-subtitle"><%= pesan %></p>
+        </div>
+        <% if (user) { %>
+            <% if (user.is_admin) { %>
+                <a href="/admin" class="btn btn-login" style="text-decoration: none; text-align: center;">
+                    Kembali ke Dashboard Admin
+                </a>
+            <% } else { %>
+                <a href="/beranda" class="btn btn-login" style="text-decoration: none; text-align: center;">
+                    Kembali ke Beranda
+                </a>
+            <% } %>
+        <% } else { %>
+            <a href="/login" class="btn btn-login" style="text-decoration: none; text-align: center;">
+                Ke Halaman Login
+            </a>
+        <% } %>
+    </div>
+
+</body>
+</html>

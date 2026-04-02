@@ -1,0 +1,335 @@
+/* =============================================================
+   FILE: dashboard/css/dashboard.css
+   FUNGSI: Stylesheet khusus modul Dashboard (Beranda)
+   ALUR: Dimuat oleh beranda.ejs via <link>
+
+   CONVENTION: Semua class diawali "beranda-"
+   untuk menghindari tabrakan dengan style global
+   ============================================================= */
+
+/* =============================================================
+   SAMBUTAN (Welcome Card)
+   ============================================================= */
+.beranda-welcome {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
+}
+
+.beranda-greeting {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 6px;
+}
+
+.beranda-greeting strong {
+    font-weight: 700;
+}
+
+.beranda-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.beranda-subtitle .badge {
+    vertical-align: middle;
+}
+
+/* =============================================================
+   SECTION (judul seksi)
+   ============================================================= */
+.beranda-section {
+    margin-bottom: 24px;
+}
+
+.beranda-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #ebf5fb;
+}
+
+/* =============================================================
+   GRID KARTU MODUL
+   ============================================================= */
+.beranda-modul-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.beranda-modul-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e8ecf0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.beranda-modul-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-color: #3498db;
+    text-decoration: none;
+}
+
+/* ---- Ikon Modul ---- */
+.beranda-modul-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* Warna ikon per modul */
+.modul-blue   { background: #ebf5fb; color: #3498db; }
+.modul-green  { background: #d5f5e3; color: #27ae60; }
+.modul-orange { background: #fdebd0; color: #e67e22; }
+.modul-purple { background: #f4ecf7; color: #8e44ad; }
+.modul-red    { background: #fadbd8; color: #e74c3c; }
+.modul-teal   { background: #d1f2eb; color: #1abc9c; }
+
+/* ---- Info Modul ---- */
+.beranda-modul-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.beranda-modul-nama {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+.beranda-modul-desc {
+    font-size: 0.82rem;
+    color: #7f8c8d;
+    line-height: 1.4;
+}
+
+/* ---- Panah navigasi ---- */
+.beranda-modul-arrow {
+    font-size: 1.2rem;
+    color: #bdc3c7;
+    flex-shrink: 0;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.beranda-modul-card:hover .beranda-modul-arrow {
+    color: #3498db;
+    transform: translateX(3px);
+}
+
+/* ---- Kosong ---- */
+.beranda-empty {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e8ecf0;
+    padding: 40px 24px;
+    text-align: center;
+    color: #95a5a6;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+/* =============================================================
+   PINTASAN (Shortcut Grid)
+   ============================================================= */
+.beranda-shortcut-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.beranda-shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #34495e;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.beranda-shortcut:hover {
+    background: #ebf5fb;
+    border-color: #3498db;
+    text-decoration: none;
+    color: #2c3e50;
+}
+
+.beranda-shortcut-icon {
+    font-size: 0.8rem;
+    color: #3498db;
+}
+
+/* =============================================================
+   HALO USER — tipis, satu baris
+   ============================================================= */
+.beranda-halo {
+    font-size: 0.95rem;
+    color: #444;
+    padding: 10px 0 6px;
+    margin-bottom: 4px;
+}
+.beranda-halo strong {
+    color: #222;
+    font-weight: 600;
+}
+.beranda-halo-atasan {
+    color: #888;
+    font-size: 0.85rem;
+}
+.beranda-halo-notif {
+    display: inline-block;
+    margin-left: 12px;
+    padding: 2px 10px;
+    background: #e74c3c;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    text-decoration: none;
+    vertical-align: middle;
+}
+.beranda-halo-notif:hover {
+    background: #c0392b;
+    text-decoration: none;
+    color: #fff;
+}
+
+/* =============================================================
+   IMAGE SLIDER / CAROUSEL
+   Rasio 4:1 (lebar:tinggi), full-width, auto-play
+   ============================================================= */
+.beranda-slider {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 1;
+    overflow: hidden;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    background: #f0f0f0;
+}
+.beranda-slider-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.beranda-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+.beranda-slide.active {
+    opacity: 1;
+    z-index: 1;
+}
+.beranda-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+/* Nav buttons */
+.beranda-slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    border: none;
+    font-size: 1.3rem;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s;
+}
+.beranda-slider-btn:hover {
+    background: rgba(0,0,0,0.6);
+}
+.beranda-slider-prev { left: 10px; }
+.beranda-slider-next { right: 10px; }
+/* Dots */
+.beranda-slider-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+}
+.beranda-slider-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.beranda-slider-dot.active,
+.beranda-slider-dot:hover {
+    background: #fff;
+}
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media (max-width: 768px) {
+    .beranda-welcome {
+        padding: 20px;
+    }
+
+    .beranda-greeting {
+        font-size: 1.2rem;
+    }
+
+    .beranda-modul-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .beranda-modul-card {
+        padding: 16px;
+    }
+
+    .beranda-shortcut-grid {
+        flex-direction: column;
+    }
+
+    .beranda-shortcut {
+        width: 100%;
+    }
+
+    .beranda-slider {
+        border-radius: 6px;
+        aspect-ratio: 3 / 1;
+    }
+
+    .beranda-slider-btn {
+        font-size: 1rem;
+        padding: 6px 9px;
+    }
+}

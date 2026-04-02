@@ -1,0 +1,90 @@
+<!-- ============================================================
+     FILE: mutasi/views/mutasi_bawahan.ejs
+     FUNGSI: Daftar bawahan langsung + tombol Remove
+     ALUR: GET /mutasi/bawahan → controller → render halaman ini
+
+     LAYOUT:
+     ┌────────────────────────────────────────────────┐
+     │ Header                                         │
+     ├──────────────┬─────────────────────────────────┤
+     │ Sidebar      │ Bawahan Langsung:               │
+     │              │ ┌──────────────────────────┐    │
+     │              │ │ Nama | Role | Remove     │    │
+     │              │ └──────────────────────────┘    │
+     └──────────────┴─────────────────────────────────┘
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+    <div class="page-header">
+        <h2 class="page-title">Bawahan Langsung</h2>
+        <p class="page-desc">Kelola bawahan langsung Anda. Anda bisa menghapus hubungan tanpa perlu persetujuan.</p>
+    </div>
+
+    <!-- Notifikasi -->
+    <% if (pesan) { %>
+    <div class="alert alert-info"><%= pesan %></div>
+    <% } %>
+
+    <!-- ====================================================
+         DAFTAR BAWAHAN
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">
+            Daftar Bawahan
+            <% if (bawahan.length > 0) { %>
+                <span class="badge badge-info" style="margin-left: 8px;"><%= bawahan.length %></span>
+            <% } %>
+        </h3>
+
+        <% if (bawahan.length === 0) { %>
+            <p class="text-muted" style="padding: 12px 0;">Anda belum memiliki bawahan langsung.</p>
+        <% } else { %>
+            <div class="subordinate-list">
+                <% bawahan.forEach(function(b) { %>
+                <div class="subordinate-card">
+                    <div class="subordinate-card-info">
+                        <div class="subordinate-card-user">
+                            <strong><%= b.nama_pengguna %></strong>
+                            <span class="badge badge-<%= b.jabatan.toLowerCase() %>"><%= b.jabatan %></span>
+                            <span style="color: #95a5a6; font-size: 0.82rem;">@<%= b.user_name %></span>
+                        </div>
+                        <div class="subordinate-card-detail">
+                            Status:
+                            <% if (b.status === 'ACTIVE') { %>
+                                <span class="badge badge-success">ACTIVE</span>
+                            <% } else { %>
+                                <span class="badge badge-warning">NO_PARENT</span>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="subordinate-card-actions">
+                        <form method="POST" action="/mutasi/remove"
+                              onsubmit="return confirm('Yakin ingin menghapus <%= b.nama_pengguna %> dari struktur Anda?\n\nUser ini akan menjadi NO_PARENT dan harus mengajukan atasan baru.')">
+                            <input type="hidden" name="subordinate_id" value="<%= b.id %>">
+                            <button type="submit" class="btn btn-sm btn-danger">&#10007; Remove</button>
+                        </form>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- ====================================================
+         INFO PENJELASAN
+         ==================================================== -->
+    <div class="section">
+        <h3 class="section-title">Informasi</h3>
+        <div class="info-box">
+            <strong>Apa yang terjadi saat Remove?</strong>
+            <ul style="margin: 8px 0 0 18px; font-size: 0.88rem;">
+                <li>Hubungan atasan-bawahan dihapus (<code>parent_id = NULL</code>)</li>
+                <li>Status bawahan berubah menjadi <strong>NO_PARENT</strong></li>
+                <li>Bawahan harus mengajukan mutasi ke atasan baru</li>
+                <li>Proses ini <strong>tidak perlu persetujuan</strong></li>
+                <li>Semua perubahan tercatat di riwayat</li>
+            </ul>
+        </div>
+    </div>
+
+<%- include('../../src/views/layout_footer') %>

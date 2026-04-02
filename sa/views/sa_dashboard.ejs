@@ -1,0 +1,131 @@
+<!-- ============================================================
+     FILE: sa/views/sa_dashboard.ejs
+     FUNGSI: Dashboard utama untuk user SA (Sales Analyst)
+     ALUR: GET /sa/dashboard → controller → render halaman ini
+     AKSES: Hanya user dengan jabatan SA
+     ============================================================ -->
+<%- include('../../src/views/layout_header') %>
+
+<link rel="stylesheet" href="/sa/css/sa.css">
+
+    <div class="page-header">
+        <div class="page-desc">
+            <div>Selamat datang, <strong><%= user.nama_pengguna %></strong></div>
+            <% if (user.nama_depo) { %>
+                <div><strong><%= user.nama_depo %></strong></div>
+            <% } %>
+            <% if (user.region) { %>
+                <div><strong><%= user.region %></strong></div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         BARIS 1: RINGKASAN DATA — RO | LBP | Stock
+         ==================================================== -->
+    <div class="sa-summary-grid sa-summary-3col">
+        <div class="sa-summary-card sa-card-ro">
+            <div class="sa-summary-icon">&#128203;</div>
+            <div class="sa-summary-info">
+                <h3 class="sa-summary-number"><%= totalRO %></h3>
+                <p class="sa-summary-label">Upload RO</p>
+                <% if (lastRO) { %>
+                    <small class="sa-summary-detail">Terakhir: <%= lastRO.uploaded_at %></small>
+                <% } else { %>
+                    <small class="sa-summary-detail">Belum ada upload</small>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="sa-summary-card sa-card-lbp">
+            <div class="sa-summary-icon">&#128202;</div>
+            <div class="sa-summary-info">
+                <h3 class="sa-summary-number"><%= totalLBP %></h3>
+                <p class="sa-summary-label">Upload LBP</p>
+                <% if (lastLBP) { %>
+                    <small class="sa-summary-detail">Terakhir: <%= lastLBP.uploaded_at %></small>
+                <% } else { %>
+                    <small class="sa-summary-detail">Belum ada upload</small>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="sa-summary-card sa-card-stock">
+            <div class="sa-summary-icon">&#128230;</div>
+            <div class="sa-summary-info">
+                <h3 class="sa-summary-number"><%= totalStock %></h3>
+                <p class="sa-summary-label">Upload Stock</p>
+                <% if (lastStock) { %>
+                    <small class="sa-summary-detail">Terakhir: <%= lastStock.uploaded_at %></small>
+                <% } else { %>
+                    <small class="sa-summary-detail">Belum ada upload</small>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         BARIS 2: UPLOAD FILE CEPAT (3 form sejajar)
+         ==================================================== -->
+    <div class="section" style="margin-top: 24px;">
+        <h3 class="section-title">&#128228; Upload File</h3>
+        <div class="sa-upload-grid">
+            <!-- Upload RO -->
+            <div class="sa-upload-box sa-box-ro">
+                <h4>RO</h4>
+                <form method="POST" action="/sa/upload-data/ro" enctype="multipart/form-data">
+                    <input type="file" name="file_upload" accept=".xlsx,.xls,.csv" class="form-input sa-file-input" required>
+                    <button type="submit" class="btn btn-primary btn-sm sa-upload-btn" onclick="return confirm('Upload file RO?')">Upload</button>
+                </form>
+            </div>
+
+            <!-- Upload LBP -->
+            <div class="sa-upload-box sa-box-lbp">
+                <h4>LBP</h4>
+                <form method="POST" action="/sa/upload-data/lbp" enctype="multipart/form-data">
+                    <input type="file" name="file_upload" accept=".xlsx,.xls,.csv" class="form-input sa-file-input" required>
+                    <button type="submit" class="btn btn-primary btn-sm sa-upload-btn" onclick="return confirm('Upload file LBP?')">Upload</button>
+                </form>
+            </div>
+
+            <!-- Upload Stock -->
+            <div class="sa-upload-box sa-box-stock">
+                <h4>Stock</h4>
+                <form method="POST" action="/sa/upload-data/stock" enctype="multipart/form-data">
+                    <input type="file" name="file_upload" accept=".xlsx,.xls,.csv" class="form-input sa-file-input" required>
+                    <button type="submit" class="btn btn-primary btn-sm sa-upload-btn" onclick="return confirm('Upload file Stock?')">Upload</button>
+                </form>
+            </div>
+        </div>
+        <p style="font-size: 0.8rem; color: #95a5a6; margin-top: 10px;">
+            File disimpan di folder <strong>DATA_SA/<%= user.region || 'TANPA_REGION' %>/{RO,LBP,Stock}/</strong>
+            &middot; Format: .xlsx, .xls, .csv
+        </p>
+    </div>
+
+    <!-- ====================================================
+         BARIS 3: INFORMASI AKUN
+         ==================================================== -->
+    <div class="section" style="margin-top: 24px;">
+        <h3 class="section-title">Informasi Akun</h3>
+        <table class="data-table" style="max-width: 500px;">
+            <tr>
+                <td style="font-weight: 600;">Region</td>
+                <td><%= user.region || '-' %></td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Area / Depo / PMA</td>
+                <td><%= user.nama_depo || '-' %></td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Jabatan</td>
+                <td><span class="badge badge-sa">SA</span></td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Nama</td>
+                <td><%= user.nama_pengguna %></td>
+            </tr>
+        </table>
+    </div>
+
+<%- include('../../src/views/layout_footer') %>
