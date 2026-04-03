@@ -5,3 +5,6 @@ __pycache__/
 *.log
 *.csv
 *.sql
+node_modules/
+npm-debug.log
+.venv

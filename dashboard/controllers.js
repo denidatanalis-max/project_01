@@ -74,11 +74,11 @@ function halamanBeranda(req, res) {
     var user      = res.locals.user;
     var userLevel = ROLE_LEVEL[user.jabatan] || 0;
 
-    // ASIST_MANAGER tanpa atasan → restricted view (hanya welcome + banner)
-    var asistBelumApproved = (user.jabatan === 'ASIST_MANAGER' && !user.parent_id);
+    // User yang wajib punya atasan tapi belum punya → restricted view (hanya welcome + banner)
+    var belumPunyaAtasan = (VALID_PARENT_ROLE[user.jabatan] && !user.parent_id);
 
     // Filter modul: hanya tampilkan yg sesuai level user
-    var modulTersedia = asistBelumApproved ? [] : DAFTAR_MODUL.filter(function(modul) {
+    var modulTersedia = belumPunyaAtasan ? [] : DAFTAR_MODUL.filter(function(modul) {
         return userLevel >= modul.minLevel;
     });
 
@@ -118,7 +118,8 @@ function halamanBeranda(req, res) {
         atasan             : atasan,
         jumlahApproval     : jumlahApproval,
         sliderImages       : sliderImages,
-        asistBelumApproved : asistBelumApproved
+        belumPunyaAtasan   : belumPunyaAtasan,
+        VALID_PARENT_ROLE  : VALID_PARENT_ROLE
     });
 }
 

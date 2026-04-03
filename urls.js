@@ -77,7 +77,7 @@ const saCtrl       = require('./sa/controllers');
 // ----------------------------------------------------------
 // Import middleware
 // ----------------------------------------------------------
-const { cekLogin, cekAdmin, cekBukanAdmin, cekApprovedAsistMgr, cekSA, catatAktivitas } = require('./src/middleware');
+const { cekLogin, cekAdmin, cekBukanAdmin, cekPunyaAtasan, cekSA, catatAktivitas } = require('./src/middleware');
 
 // ============================================================
 // ROUTE PUBLIK (tidak perlu login)
@@ -139,9 +139,9 @@ router.get('/beranda', cekLogin, cekBukanAdmin, catatAktivitas, dashboardCtrl.ha
 // ============================================================
 // ROUTE KALKULATOR HARGA (hanya user biasa)
 // ============================================================
-router.get('/kalkulator',              cekLogin, cekBukanAdmin, cekApprovedAsistMgr, catatAktivitas, kalkCtrl.halamanKalkulator);
-router.get('/kalkulator/api/products', cekLogin, cekBukanAdmin, cekApprovedAsistMgr, kalkCtrl.apiGetProducts);
-router.post('/kalkulator/api/hitung',  cekLogin, cekBukanAdmin, cekApprovedAsistMgr, kalkCtrl.apiHitung);
+router.get('/kalkulator',              cekLogin, cekBukanAdmin, cekPunyaAtasan, catatAktivitas, kalkCtrl.halamanKalkulator);
+router.get('/kalkulator/api/products', cekLogin, cekBukanAdmin, cekPunyaAtasan, kalkCtrl.apiGetProducts);
+router.post('/kalkulator/api/hitung',  cekLogin, cekBukanAdmin, cekPunyaAtasan, kalkCtrl.apiHitung);
 
 // ============================================================
 // ROUTE MUTASI ATASAN (hanya user biasa)
@@ -160,16 +160,16 @@ router.post('/mutasi/reject-depo',  cekLogin, cekBukanAdmin, catatAktivitas, mut
 // ============================================================
 // ROUTE PENCAPAIAN
 // ============================================================
-router.get('/pencapaian',           cekLogin, cekBukanAdmin, cekApprovedAsistMgr, catatAktivitas, pencapaianCtrl.halamanPencapaian);
-router.get('/pencapaian/lph',       cekLogin, cekBukanAdmin, cekApprovedAsistMgr, catatAktivitas, pencapaianCtrl.halamanLPH);
-router.get('/pencapaian/scorecard', cekLogin, cekBukanAdmin, cekApprovedAsistMgr, catatAktivitas, pencapaianCtrl.halamanScoreCard);
-router.get('/pencapaian/mpp',       cekLogin, cekBukanAdmin, cekApprovedAsistMgr, catatAktivitas, pencapaianCtrl.halamanMPP);
-router.get('/pencapaian/stock',     cekLogin, cekBukanAdmin, cekApprovedAsistMgr, catatAktivitas, pencapaianCtrl.halamanStock);
+router.get('/pencapaian',           cekLogin, cekBukanAdmin, cekPunyaAtasan, catatAktivitas, pencapaianCtrl.halamanPencapaian);
+router.get('/pencapaian/lph',       cekLogin, cekBukanAdmin, cekPunyaAtasan, catatAktivitas, pencapaianCtrl.halamanLPH);
+router.get('/pencapaian/scorecard', cekLogin, cekBukanAdmin, cekPunyaAtasan, catatAktivitas, pencapaianCtrl.halamanScoreCard);
+router.get('/pencapaian/mpp',       cekLogin, cekBukanAdmin, cekPunyaAtasan, catatAktivitas, pencapaianCtrl.halamanMPP);
+router.get('/pencapaian/stock',     cekLogin, cekBukanAdmin, cekPunyaAtasan, catatAktivitas, pencapaianCtrl.halamanStock);
 
 // ============================================================
 // ROUTE GAMES
 // ============================================================
-router.get('/games',           cekLogin, cekBukanAdmin, cekApprovedAsistMgr, catatAktivitas, gamesCtrl.halamanGames);
+router.get('/games',           cekLogin, cekBukanAdmin, cekPunyaAtasan, catatAktivitas, gamesCtrl.halamanGames);
 
 // ============================================================
 // ROUTE SA (hanya jabatan SA)
