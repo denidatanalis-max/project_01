@@ -1,3 +1,3 @@
-.\cloudflared-windows-amd64.exe tunnel --url http://localhost:3000
-.\cloudflared-windows-amd64.exe tunnel --url http://localhost:3000 --protocol http2
-epb
+not a fancy project or anything,
+but it works, it shines, and it’s actually useful —
+and that’s enough for me 🔥
