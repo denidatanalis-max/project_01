@@ -14,29 +14,6 @@
 //     BOS / MANAGER / RBM / BM / ASS
 //     Akses beranda + modul-modul. TIDAK bisa lihat
 //     log aktivitas, riwayat login, atau data sensitif.
-//
-// DAFTAR ROUTE:
-//   GET  /login                          → Halaman login
-//   POST /login                          → Proses login
-//   GET  /logout                         → Proses logout
-//
-//   --- ADMIN ONLY ---
-//   GET  /admin                          → Dashboard admin
-//   GET  /admin/kelola-user              → Kelola user (CRUD)
-//   POST /admin/kelola-user/tambah       → Tambah user manual
-//   POST /admin/kelola-user/hapus        → Hapus user
-//   POST /admin/kelola-user/hapus-semua   → Hapus semua user biasa (verifikasi password)
-//   POST /admin/kelola-user/edit         → Edit user
-//   GET  /admin/kelola-user/template     → Download template Excel
-//   POST /admin/kelola-user/upload-excel → Upload user dari Excel
-//   GET  /admin/aktivitas                → Log aktivitas semua user
-//   GET  /admin/riwayat-login            → Riwayat login semua user
-//
-//   --- USER BIASA ---
-//   GET  /beranda                        → Beranda (kartu modul)
-//   GET  /kalkulator                     → Kalkulator harga
-//   GET  /kalkulator/api/products        → API data produk
-//   POST /kalkulator/api/hitung          → API hitung harga
 // ============================================================
 
 const express = require('express');
