@@ -1,0 +1,24 @@
+    <div class="beranda-section">
+        <h3 class="beranda-section-title">Promo Terbaru</h3>
+
+        <% if (modulTersedia.length === 0) { %>
+            <div class="beranda-empty">
+                <p>Belum ada promo yang tersedia untuk level akses Anda.</p>
+            </div>
+        <% } else { %>
+            <div class="beranda-modul-grid">
+                <% modulTersedia.forEach(function(modul) { %>
+                    <a href="<%= modul.url %>" class="beranda-modul-card">
+                        <div class="beranda-modul-icon <%= modul.warna %>">
+                            <%- modul.ikon %>
+                        </div>
+                        <div class="beranda-modul-info">
+                            <h4 class="beranda-modul-nama"><%= modul.nama %></h4>
+                            <p class="beranda-modul-desc"><%= modul.deskripsi %></p>
+                        </div>
+                        <span class="beranda-modul-arrow">&#10132;</span>
+                    </a>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>

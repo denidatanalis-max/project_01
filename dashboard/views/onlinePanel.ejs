@@ -1,0 +1,132 @@
+<div class="section" style="margin-top: 20px;">
+        <h3 class="section-title">&#9679; Tim Online</h3>
+        <div class="online-role-grid" id="onlineRoleGrid">
+            <!-- Kartu role akan di-render oleh JavaScript -->
+        </div>
+    </div>
+
+    <!-- ====================================================
+         SCRIPT: Online panel untuk user biasa
+         ==================================================== -->
+    <script>
+        var onlineData = { counts: {}, details: [] };
+        var openRoles  = {};
+        var myJabatan  = '<%= user.jabatan %>';
+
+        // Toggle expand/collapse
+        function toggleRoleDetail(role) {
+            var el    = document.getElementById('detail_' + role);
+            var arrow = document.getElementById('arrow_' + role);
+            if (!el) return;
+
+            if (el.style.display === 'none') {
+                el.style.display = 'block';
+                arrow.innerHTML  = '&#9650;';
+                openRoles[role]  = true;
+                renderRoleDetail(role);
+            } else {
+                el.style.display = 'none';
+                arrow.innerHTML  = '&#9660;';
+                openRoles[role]  = false;
+            }
+        }
+
+        function renderRoleDetail(role) {
+            var container = document.getElementById('list_' + role);
+            if (!container) return;
+
+            var users = onlineData.details.filter(function(u) {
+                return u.jabatan === role;
+            });
+
+            if (users.length === 0) {
+                container.innerHTML = '<p class="text-muted">Tidak ada user online.</p>';
+                return;
+            }
+
+            var html = '<table class="data-table data-table-sm">';
+            html += '<thead><tr><th>Nama</th><th>Status</th><th>Device</th></tr></thead>';
+            html += '<tbody>';
+            for (var i = 0; i < users.length; i++) {
+                var u  = users[i];
+                var ua = parseDevice(u.user_agent || '');
+                html += '<tr>';
+                html += '<td><span class="online-dot"></span> ' + escapeHtml(u.nama_pengguna) + '</td>';
+                html += '<td><span class="badge badge-success">Online</span></td>';
+                html += '<td class="detail-cell">' + escapeHtml(ua) + '</td>';
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Render kartu role & update angka
+        function updateOnlineUI(data) {
+            onlineData = data;
+            var roles  = Object.keys(data.counts);
+            var grid   = document.getElementById('onlineRoleGrid');
+            if (!grid) return;
+
+            // Cek apakah kartu sudah ada (update saja angkanya)
+            var existing = document.getElementById('count_' + (roles[0] || ''));
+            if (existing) {
+                // Update angka saja
+                for (var i = 0; i < roles.length; i++) {
+                    var role  = roles[i];
+                    var count = data.counts[role] || 0;
+                    var el    = document.getElementById('count_' + role);
+                    if (el) el.textContent = count;
+                    if (openRoles[role]) renderRoleDetail(role);
+                }
+                return;
+            }
+
+            // Pertama kali: buat kartu
+            var html = '';
+            for (var j = 0; j < roles.length; j++) {
+                var r = roles[j];
+                var c = data.counts[r] || 0;
+                html += '<div class="online-role-card" data-role="' + r + '" onclick="toggleRoleDetail(\'' + r + '\')">';
+                html += '  <div class="online-role-icon role-icon-' + r.toLowerCase() + '">';
+                html += '    <span class="online-role-count" id="count_' + r + '">' + c + '</span>';
+                html += '  </div>';
+                html += '  <div class="online-role-label">' + r + '</div>';
+                html += '  <div class="online-role-arrow" id="arrow_' + r + '">&#9660;</div>';
+                html += '</div>';
+                html += '<div class="online-role-detail" id="detail_' + r + '" style="display:none;">';
+                html += '  <div class="online-role-detail-inner" id="list_' + r + '">';
+                html += '    <p class="text-muted">Tidak ada user online.</p>';
+                html += '  </div>';
+                html += '</div>';
+            }
+            grid.innerHTML = html;
+        }
+
+        function parseDevice(ua) {
+            if (!ua) return '-';
+            if (ua.indexOf('Mobile') !== -1 || ua.indexOf('Android') !== -1) return 'Mobile';
+            if (ua.indexOf('Windows') !== -1) return 'Windows';
+            if (ua.indexOf('Mac') !== -1) return 'Mac';
+            if (ua.indexOf('Linux') !== -1) return 'Linux';
+            return 'Browser';
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        // Ambil data awal via API (backend sudah filter by role)
+        fetch('/api/online-users')
+            .then(function(r) { return r.json(); })
+            .then(function(data) { updateOnlineUI(data); });
+
+        // Auto-refresh Tim Online setiap 60 detik
+        // Sinkron dengan heartbeat — tangkap perubahan online/offline
+        setInterval(function() {
+            fetch('/api/online-users')
+                .then(function(r) { return r.json(); })
+                .then(function(data) { updateOnlineUI(data); });
+        }, 60000);
+    </script>

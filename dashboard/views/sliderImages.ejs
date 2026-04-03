@@ -1,0 +1,56 @@
+    <div class="beranda-slider">
+        <div class="beranda-slider-track" id="sliderTrack">
+            <% sliderImages.forEach(function(src, idx) { %>
+            <div class="beranda-slide<%= idx === 0 ? ' active' : '' %>">
+                <img src="<%= src %>" alt="Slide <%= idx + 1 %>" draggable="false">
+            </div>
+            <% }); %>
+        </div>
+
+        <% if (sliderImages.length > 1) { %>
+        <button class="beranda-slider-btn beranda-slider-prev" onclick="sliderNav(-1)" aria-label="Previous">&#10094;</button>
+        <button class="beranda-slider-btn beranda-slider-next" onclick="sliderNav(1)" aria-label="Next">&#10095;</button>
+        <div class="beranda-slider-dots" id="sliderDots">
+            <% sliderImages.forEach(function(src, idx) { %>
+            <span class="beranda-slider-dot<%= idx === 0 ? ' active' : '' %>" onclick="sliderGo( <%= idx %> )"></span>
+            <% }); %>
+        </div>
+        <% } %>
+    </div>
+
+    <script>
+    (function() {
+        var current   = 0;
+        var slides    = document.querySelectorAll('.beranda-slide');
+        var dots      = document.querySelectorAll('.beranda-slider-dot');
+        var total     = slides.length;
+        var autoTimer = null;
+
+        function show(idx) {
+            if (total <= 1) return;
+            slides[current].classList.remove('active');
+            if (dots[current]) dots[current].classList.remove('active');
+            current = (idx + total) % total;
+            slides[current].classList.add('active');
+            if (dots[current]) dots[current].classList.add('active');
+        }
+
+        window.sliderNav = function(dir) {
+            show(current + dir);
+            resetAuto();
+        };
+        window.sliderGo = function(idx) {
+            show(idx);
+            resetAuto();
+        };
+
+        function autoPlay() {
+            autoTimer = setInterval(function() { show(current + 1); }, 5000);
+        }
+        function resetAuto() {
+            clearInterval(autoTimer);
+            autoPlay();
+        }
+        if (total > 1) autoPlay();
+    })();
+    </script>
