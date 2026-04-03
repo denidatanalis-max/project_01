@@ -1,3 +1,9 @@
-not a fancy project or anything,
-but it works, it shines, and it’s actually useful —
-and that’s enough for me 🔥
+nothing fancy here fr,
+just hit:
+
+npm run start
+
+and you’re good to go.
+
+if i managed to run this without breaking everything,
+you’ll be just fine 🤝
