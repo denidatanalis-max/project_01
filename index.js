@@ -222,6 +222,5 @@ server.listen(PORT, function() {
     console.log('========================================');
     console.log('  Server berjalan di http://localhost:' + PORT);
     console.log('  Socket.IO aktif (real-time logout)');
-    console.log('  Login default: admin / admin123');
     console.log('========================================');
 });
