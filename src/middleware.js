@@ -2,7 +2,7 @@
 // FILE: src/middleware.js
 // FUNGSI: Middleware untuk autentikasi, otorisasi level jabatan,
 //         dan pencatatan aktivitas user
-// ALUR: app.js → use(middleware) → setiap request dicek
+// ALUR: index.js → use(middleware) → setiap request dicek
 // ============================================================
 
 const db = require('./database');
@@ -208,14 +208,15 @@ function cekBukanAdmin(req, res, next) {
 }
 
 // ============================================================
-// MIDDLEWARE: cekApprovedAsistMgr
+// MIDDLEWARE: cekPunyaAtasan
 // Untuk route modul (kalkulator, pencapaian, games, dll):
-// Jika user adalah ASIST_MANAGER dan belum punya atasan (parent_id),
-// redirect ke /beranda (tampilkan restricted dashboard)
+// Jika jabatan user WAJIB punya atasan (VALID_PARENT_ROLE !== null)
+// tapi parent_id kosong → redirect ke /beranda (restricted view)
+// Berlaku untuk: ASIST_MANAGER, BM, ASS, SALES
 // ============================================================
-function cekApprovedAsistMgr(req, res, next) {
+function cekPunyaAtasan(req, res, next) {
     const user = res.locals.user;
-    if (user && user.jabatan === 'ASIST_MANAGER' && !user.parent_id) {
+    if (user && VALID_PARENT_ROLE[user.jabatan] && !user.parent_id) {
         return res.redirect('/beranda');
     }
     next();
@@ -242,7 +243,7 @@ module.exports = {
     cekJabatan,
     cekAdmin,
     cekBukanAdmin,
-    cekApprovedAsistMgr,
+    cekPunyaAtasan,
     cekSA,
     catatAktivitas,
     ROLE_LEVEL,

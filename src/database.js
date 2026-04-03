@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: src/database.js
 // FUNGSI: Inisialisasi database SQLite dan membuat tabel-tabel
-// ALUR: app.js → require('./src/database') → return db instance
+// ALUR: index.js → require('./src/database') → return db instance
 // ============================================================
 
 const Database = require('better-sqlite3');

@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: src/socketManager.js
 // FUNGSI: Singleton Socket.IO — online tracking + force logout
-// ALUR: app.js init(io) → controller require → getIO() / helpers
+// ALUR: index.js init(io) → controller require → getIO() / helpers
 //
 // FITUR:
 //   1. Force logout user saat login di device baru
@@ -13,7 +13,7 @@
 var _io = null;
 var _db = null;
 
-// Simpan instance io (dipanggil sekali dari app.js)
+// Simpan instance io (dipanggil sekali dari index.js)
 function init(io) {
     _io = io;
     _db = require('./database');

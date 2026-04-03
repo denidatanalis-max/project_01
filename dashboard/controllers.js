@@ -9,7 +9,7 @@
 // CATATAN:
 //   - Modul ini MANDIRI (self-contained)
 //   - Jika folder dashboard/ dihapus, sistem tetap jalan
-//   - Tinggal hapus require + route di urls.js dan app.js
+//   - Tinggal hapus require + route di urls.js dan index.js
 //
 // DAFTAR MODUL YANG TAMPIL DI BERANDA:
 //   Setiap modul didefinisikan di array DAFTAR_MODUL di bawah.
@@ -17,7 +17,7 @@
 //   Property minLevel mengontrol jabatan minimum yang bisa lihat.
 // ============================================================
 
-const { ROLE_LEVEL } = require('../src/middleware');
+const { ROLE_LEVEL, VALID_PARENT_ROLE } = require('../src/middleware');
 const db = require('../src/database');
 const fs   = require('fs');
 const path = require('path');

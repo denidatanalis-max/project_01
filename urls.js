@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: urls.js
 // FUNGSI: Mengatur semua routing/URL aplikasi
-// ALUR: app.js → require('./urls') → register semua route
+// ALUR: index.js → require('./urls') → register semua route
 //
 // KONSEP: 2 DUNIA TERPISAH (mirip Django)
 //
